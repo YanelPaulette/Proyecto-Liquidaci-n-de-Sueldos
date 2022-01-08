@@ -1,0 +1,110 @@
+---
+title: "Anexo 1: Liquidación de Sueldos"
+subtitle: "Conceptos Básicos"
+author: "Yanel Paulette y Diego Sipes"
+date: '\today'
+linkcolor: blue
+urlcolor: blue
+output:
+  html_document:
+    theme: spacelab
+    toc: true
+    toc_float: true
+    code_folding: show
+    code_download: true
+
+---
+
+Nota: Voy trabajando este documento, volcando ideas para ir armando el codigo. 
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# Procesamiento de Novedades de liquidacion 
+
+##Objetivos
+completar
+
+## Destinatarios
+completar
+
+## Procedimiento
+
+Para comenzar, se deben realizar configuraciones iniciales, las cuales iren detallando a continuación: 
+
+
+## Pasos (ver)
+
+Definiciones iniciales: 
+
+1° Clasificar conceptos en Fijos, variables, remunerativo, no remunerativo, descuento.
+
+2° Definir tipos de licencias. En esta oprtunidad, debido al objetivo del proyecto  solo creamos 2, enfermedad y vacaciones. 
+
+3° Definir bases de las horas extras
+
+4° Crear objeto con tope de aportes 
+
+6° Crear acumulados
+
+ - Enfermedad (fijo + variables 6)
+ 
+ - Vacaciones ( Fijo + variable 6/12)
+ 
+7° Ver embargos
+
+8° Definir perfiles, dentro y fuera de CCT para asigar conceptos de liquidacion 
+
+9° Definir tipos de liquidacion: mensual/ quincenal  / final (solo trabajar mensual)
+
+
+## Procesamiento de novedades: 
+
+- Recibimos las novedades. 
+
+Podemos recibirlo de diferente manera. Ejemplos: (Subir imagenes)..pero el procesamiento es similar... bla
+
+
+- Limpiamos la base, (tipo variables, nombres, errores...)
+
+
+-chequer legajos existentes / nuevos 
+
+
+- Preguntar guia para la liquidacion. 
+
+
+Es dentro o fuera de convenio?
+
+Cuantos dias trabajados? (segun fecha de ingreso)
+
+Tiene licencias? 
+
+Tiene Variables?
+
+Tiene embargos?
+
+Esta sindicalizado?
+
+Tiene descuentos adicionales? (ver)
+
+
+## Dashboard
+
+Una vez que tenemos todo, sintetizar datos en un tablero
+
+-Cantidad de empleados:
+
+-Activos  / no activos
+
+-Dentro   / fuera cct
+
+-sindicalizados/ no 
+
+-totales bruto / neto
+
+-tocal cargas sociales AFIP
+
+-total sindicato a pagar
+
