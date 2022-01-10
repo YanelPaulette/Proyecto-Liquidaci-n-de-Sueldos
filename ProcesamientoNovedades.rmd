@@ -36,6 +36,182 @@ Para comenzar, se deben realizar configuraciones iniciales, las cuales iren deta
 
 ## Pasos (ver)
 
+Incorporamos las librerias a utilizar
+
+```{r}
+library(flexdashboard)
+library(tidyverse)      # Transformar y limpiar datos
+library(googlesheets4)  # Leer datos desde Google Sheets
+library(gargle)         # Corregir lectura de símbolos especiales desde Google Sheets
+library(gt)             # Dar formato a las tablas
+library(extrafont)      # Permite utilizar otras fuentes en los gráficos y salidas
+library(ggthemes)       # Amplía las posibilidades estéticas de ggplot2
+library(scales)         # Permite cambiar los formatos de decimales, de porcentajes, etc.
+library(ggalt)          # Nuevos tipos de geom para ggplot2. Para realizar el gráfico de gap salarial
+library(ggplot2)
+library(funModeling)    # Para explorar datos y modelos
+library(forcats)
+library(DT)
+library(kableExtra)
+library(tm)
+library(expss)
+```
+
+Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos: 
+
+```{r}
+# Estilo limpio sin líneas de fondo
+estilo <- theme(panel.grid = element_blank(),
+                plot.background = element_rect(fill = "#FBFCFC"),
+                panel.background = element_blank(),
+                text = element_text(family = "Roboto"))
+
+# Estilo limpio con líneas de referencia verticales en gris claro
+estilov <- theme(panel.grid = element_blank(),
+                 plot.background = element_rect(fill = "#FBFCFC"),
+                 panel.background = element_blank(),
+                 panel.grid.major.x = element_line(color = "#AEB6BF"),
+                 text = element_text(family = "Roboto"))
+
+# Estilo limpio con líneas de referencia horizontales en gris claro
+estiloh <- theme(panel.grid = element_blank(),
+                 plot.background = element_rect(fill = "#FBFCFC"),
+                 panel.background = element_blank(),
+                 panel.grid.major.y = element_line(color = "#AEB6BF"),
+                 text = element_text(family = "Roboto"))
+
+#  objetos para formatear las etiquetas numéricas de los ejes x e y
+eje_x_n <- scale_x_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
+
+eje_y_n <- scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
+
+#colores
+
+azul <- "#344D7E"
+verde <-  "#4A9FC7"
+rosa1 <- "#B95192"
+rosa2 <- "#EE5777"
+naranja <- "#FF764C"
+amarillo <- "#FFA600"
+gris <- "#75838F"
+lila <- "#755395"
+rojo <- "#943126"
+fuente <- "Fuente: Elaboración propiaS"
+```
+
+Incorporamos las bases de datos a utilizar: 
+
+```{r}
+original <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14")
+egreso <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2")
+
+```
+
+Comenzamos con algunas limpiezas;: 
+
+```{r}
+#agregar puntos a las  columnas:
+
+
+limpios <- make.names(colnames(original)) #agregar puntos columnas
+colnames(original) <- limpios
+rm(limpios) # borro objeto
+```
+
+
+Consultamos el tamaño de nuestro dataset. En este caso tiene una dimension de `tamaño`, con  `columnas` y con  `filas`. Cada fila representa una persona, y cada columna una variable. 
+
+
+Vemos ahora,  si las columnas tienen nombres inadecuados para  trabajar  y acto seguido los modificamos
+
+```{r}
+  names(original)
+```
+
+Cambiamos los nombres de las columnas con la funcion "Rename"
+
+```{r}
+
+Novedades <- original %>% 
+  rename("Hs.Extras.50%" = "X50.")%>% 
+  rename("Hs.Extras.100%" = "X100.")%>% 
+  rename("Hs.Noct" = "Noc")%>% 
+  rename("Hs.Noct.50%" = "Noc.50.")%>% 
+  rename("Hs.Noct.100%" = "Noc.100.")%>%
+  rename("Centro.Costo" = "CC") 
+
+
+```
+
+
+Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion "View"
+```{r}
+view(Novedades)
+```
+
+Por el alacance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
+
+```{r}
+Novedades_<- Novedades%>% 
+  select(Legajo, Centro.Costo,  Activo, Fecha.de.Egreso, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )
+```
+
+¿ Qué tipo de análisis podemos hacer?
+
+Aqui tenemos que pensar qué datos son relevantes para el negocio. Mirando con dichos ojos, qué analsis podemos hacer con  poca intervencion de código. 
+
+En primer lugar podemos conocer cantidades. 
+
+Podemos consultar cual es la nomina  que tiene actualmente la compañia. 
+
+```{r}
+Nomina<- Novedades %>% 
+  select(Activo) %>%
+  mutate(cuenta = 1) %>% 
+  group_by(Activo) %>% 
+  summarise(Cuenta = sum(cuenta)) %>% 
+  arrange(-Cuenta)
+
+Nomina
+
+```
+
+Podemos mejorar la visualización con un paquete {Kable}
+
+```{r}
+
+Nomina$TIP <- c("ver")
+
+Nomina%>% 
+  mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
+    select(Activo,Cuenta) %>% kable("html", escape=F) %>% 
+    kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
+row_spec(0, bold=T, color="white", background = azul)
+
+
+
+```
+
+
+
+
+Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso. 
+Es posible que dicha información no la tengamos en el mismo archivo, en ese caso, tendremos que hacer  unos pasos adicionales para poder unir tablas. 
+
+```{r}
+
+```
+
+Continuamos con las variables informadas: 
+
+```{r}
+
+```
+
+
+
+
+
 Definiciones iniciales: 
 
 1° Clasificar conceptos en Fijos, variables, remunerativo, no remunerativo, descuento.
