@@ -10,7 +10,7 @@ output:
     theme: spacelab
     toc: true
     toc_float: true
-    code_folding: show
+    code_folding: hide
     code_download: true
 
 ---
@@ -102,8 +102,8 @@ fuente <- "Fuente: Elaboración propiaS"
 Incorporamos las bases de datos a utilizar: 
 
 ```{r}
-original <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14")
-egreso <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2")
+original <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
+egreso <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2") #la 2° hoja
 
 ```
 
@@ -116,6 +116,14 @@ Comenzamos con algunas limpiezas;:
 limpios <- make.names(colnames(original)) #agregar puntos columnas
 colnames(original) <- limpios
 rm(limpios) # borro objeto
+
+#agregar puntos a las  columnas:
+
+
+limpios <- make.names(colnames(egreso)) #agregar puntos columnas
+colnames(egreso) <- limpios
+rm(limpios) # borro objeto
+
 ```
 
 
@@ -125,7 +133,7 @@ Consultamos el tamaño de nuestro dataset. En este caso tiene una dimension de `
 Vemos ahora,  si las columnas tienen nombres inadecuados para  trabajar  y acto seguido los modificamos
 
 ```{r}
-  names(original)
+names(original)
 ```
 
 Cambiamos los nombres de las columnas con la funcion "Rename"
@@ -135,16 +143,20 @@ Cambiamos los nombres de las columnas con la funcion "Rename"
 Novedades <- original %>% 
   rename("Hs.Extras.50%" = "X50.")%>% 
   rename("Hs.Extras.100%" = "X100.")%>% 
+  rename("Hs.Feriado" = "X100..FT")%>% 
   rename("Hs.Noct" = "Noc")%>% 
   rename("Hs.Noct.50%" = "Noc.50.")%>% 
   rename("Hs.Noct.100%" = "Noc.100.")%>%
+  rename("Hs.Viaje" = "Horas.Viaje")%>%
+  rename("2°Vianda" = "D.Vianda") %>%
   rename("Centro.Costo" = "CC") 
 
 
 ```
 
 
-Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion "View"
+Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion "View":
+
 ```{r}
 view(Novedades)
 ```
@@ -152,13 +164,14 @@ view(Novedades)
 Por el alacance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
 
 ```{r}
-Novedades_<- Novedades%>% 
-  select(Legajo, Centro.Costo,  Activo, Fecha.de.Egreso, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )
+Novedades2<- Novedades%>% 
+  select(Legajo, Centro.Costo,  Activo, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )
 ```
 
 ¿ Qué tipo de análisis podemos hacer?
 
-Aqui tenemos que pensar qué datos son relevantes para el negocio. Mirando con dichos ojos, qué analsis podemos hacer con  poca intervencion de código. 
+Aqui tenemos que pensar qué datos son relevantes para el negocio. 
+Mirando con dichos ojos, qué analsis podemos hacer con  poca intervencion de código. 
 
 En primer lugar podemos conocer cantidades. 
 
@@ -176,11 +189,13 @@ Nomina
 
 ```
 
-Podemos mejorar la visualización con un paquete {Kable}
+Podemos mejorar la visualización con el paquete {Kable}
+
+* Aplausos para la maravilla del parametro TIP*
 
 ```{r}
 
-Nomina$TIP <- c("ver")
+Nomina$TIP <- c("Podemos destacar algo")
 
 Nomina%>% 
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
@@ -194,76 +209,105 @@ row_spec(0, bold=T, color="white", background = azul)
 
 
 
-
 Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso. 
-Es posible que dicha información no la tengamos en el mismo archivo, en ese caso, tendremos que hacer  unos pasos adicionales para poder unir tablas. 
 
+Es posible que dicha información no la tengamos en la misma tabla, en ese caso, tendremos que hacer  unos pasos adicionales. 
+
+A continuación vamos a ver cómo relacionamos dos tablas. Para hacerlo, necesitamos 1 elemento en común: en nuestro caso será el legajo. 
+
+El resultado:  una nueva tabla con la información combinada.
+
+Primero: consultamos los nombres de las columnas: 
 ```{r}
+names(egreso)
+names(original)
 
 ```
 
-Continuamos con las variables informadas: 
+Primero, seleccionamos las columnas de la segunda hoja, con las que vamos a trabajar: 
 
 ```{r}
+egreso2<- egreso%>%
+  select(Legajo, Fecha.de.Ingreso, Fecha.de.Egreso, Motivo.de.Egreso)
 
 ```
 
+Luego, unimos las tablas por la columna en comun "Legajo" y seleccionamos las columnas deseadas: 
+
+```{r}
+
+egreso3 <- left_join(original, egreso, by = "Legajo")
+
+egreso3<-egreso3%>%
+  select(Legajo:Convenio, Motivo.de.Egreso) %>%   # Usamos rangos, y columnas independientes
+  filter(Activo=="NO")  %>%  
+  mutate(cuenta = 1) %>% 
+  group_by(Motivo.de.Egreso) %>% 
+  summarise(Cuenta = sum(cuenta)) %>% 
+  arrange(-Cuenta)
+
+
+
+```
+
+Y luego presentamos la información  en una tabla: 
 
 
 
 
-Definiciones iniciales: 
+```{r}
 
-1° Clasificar conceptos en Fijos, variables, remunerativo, no remunerativo, descuento.
+egreso3$TIP <- c("Egresos del mes")
 
-2° Definir tipos de licencias. En esta oprtunidad, debido al objetivo del proyecto  solo creamos 2, enfermedad y vacaciones. 
+egreso3%>% 
+  mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
+    select(Motivo.de.Egreso,Cuenta) %>% kable("html", escape=F) %>% 
+    kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
+row_spec(0, bold=T, color="white", background = azul)
 
-3° Definir bases de las horas extras
+```
 
-4° Crear objeto con tope de aportes 
+En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repiten, lo cual implica que unifiquemos nombres, lo cual hacemos con la funcion "fct_collapse":
 
-6° Crear acumulados
+```{r}
+ egreso3<-  egreso2 %>%
+ mutate(Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, "Desp C/C" = c("Desp C/ Causa","Despido con causa", "Despido C/C")),
+        Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, "Desp S/C" = c("Despido sin C","Despido sin causa", "Despido S/C")))
+```
 
- - Enfermedad (fijo + variables 6)
- 
- - Vacaciones ( Fijo + variable 6/12)
- 
-7° Ver embargos
-
-8° Definir perfiles, dentro y fuera de CCT para asigar conceptos de liquidacion 
-
-9° Definir tipos de liquidacion: mensual/ quincenal  / final (solo trabajar mensual)
-
-
-## Procesamiento de novedades: 
-
-- Recibimos las novedades. 
-
-Podemos recibirlo de diferente manera. Ejemplos: (Subir imagenes)..pero el procesamiento es similar... bla
+AHora si volvemos a presentar la información en una tabla: 
 
 
-- Limpiamos la base, (tipo variables, nombres, errores...)
+```{r}
+egreso3$TIP <- c("Egresos del mes")
 
 
--chequer legajos existentes / nuevos 
+egreso3 %>%   # Usamos rangos, y columnas independientes
+  mutate(cuenta = 1) %>% 
+  group_by(Motivo.de.Egreso) %>% 
+  summarise(Cuenta = sum(cuenta)) %>% 
+  arrange(-Cuenta)%>%
+  kable("html", escape=F) %>% 
+    kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
+row_spec(0, bold=T, color="white", background = azul)
+
+```
+
+Por último quisieramos saber la cantidad de licencias que tuvimos en el mes. (ver, queda horrible)
 
 
-- Preguntar guia para la liquidacion. 
+```{r}
+Novedades2%>% 
+  select(Legajo, Enfermedad, Vacaciones ) %>% 
+  filter(Enfermedad!=0  | Vacaciones!=0) %>%    # operador or
+  mutate(cuenta = 1) %>% 
+  group_by(Enfermedad,Vacaciones)%>% 
+  summarise(Cuenta = sum(cuenta)) %>% 
+  arrange(-Cuenta)
 
 
-Es dentro o fuera de convenio?
 
-Cuantos dias trabajados? (segun fecha de ingreso)
-
-Tiene licencias? 
-
-Tiene Variables?
-
-Tiene embargos?
-
-Esta sindicalizado?
-
-Tiene descuentos adicionales? (ver)
+```
 
 
 ## Dashboard

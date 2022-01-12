@@ -339,36 +339,45 @@ lila &lt;- &quot;#755395&quot;
 rojo &lt;- &quot;#943126&quot;
 fuente &lt;- &quot;Fuente: Elaboración propiaS&quot;</code></pre>
 <p>Incorporamos las bases de datos a utilizar:</p>
-<pre class="r"><code>original &lt;- read_sheet(&quot;1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14&quot;)
-egreso &lt;- read_sheet(&quot;1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14&quot;, sheet = &quot;2&quot;)</code></pre>
+<pre class="r"><code>original &lt;- read_sheet(&quot;1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14&quot;) # 1° hoja
+egreso &lt;- read_sheet(&quot;1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14&quot;, sheet = &quot;2&quot;) #la 2° hoja</code></pre>
 <p>Comenzamos con algunas limpiezas;:</p>
 <pre class="r"><code>#agregar puntos a las  columnas:
 
 
 limpios &lt;- make.names(colnames(original)) #agregar puntos columnas
 colnames(original) &lt;- limpios
+rm(limpios) # borro objeto
+
+#agregar puntos a las  columnas:
+
+
+limpios &lt;- make.names(colnames(egreso)) #agregar puntos columnas
+colnames(egreso) &lt;- limpios
 rm(limpios) # borro objeto</code></pre>
 <p>Consultamos el tamaño de nuestro dataset. En este caso tiene una dimension de <code>tamaño</code>, con <code>columnas</code> y con <code>filas</code>. Cada fila representa una persona, y cada columna una variable.</p>
 <p>Vemos ahora, si las columnas tienen nombres inadecuados para trabajar y acto seguido los modificamos</p>
-<pre class="r"><code>  names(original)</code></pre>
-<pre><code>##  [1] &quot;Legajo&quot;           &quot;Nombre&quot;           &quot;CC&quot;               &quot;Activo&quot;          
-##  [5] &quot;Fecha.de.Ingreso&quot; &quot;Fecha.de.Egreso&quot;  &quot;Convenio&quot;         &quot;X50.&quot;            
-##  [9] &quot;X100.&quot;            &quot;X100..FT&quot;         &quot;Noc&quot;              &quot;Noc.50.&quot;         
-## [13] &quot;Noc.100.&quot;         &quot;Hv.Norm&quot;          &quot;Hv.Exed&quot;          &quot;V.&quot;              
-## [17] &quot;V.D.T.&quot;           &quot;Desarraigo&quot;       &quot;Enfermedad&quot;       &quot;Vacaciones&quot;</code></pre>
+<pre class="r"><code>names(original)</code></pre>
+<pre><code>##  [1] &quot;Legajo&quot;      &quot;Nombre&quot;      &quot;CC&quot;          &quot;Activo&quot;      &quot;Convenio&quot;   
+##  [6] &quot;X50.&quot;        &quot;X100.&quot;       &quot;X100..FT&quot;    &quot;Noc&quot;         &quot;Noc.50.&quot;    
+## [11] &quot;Noc.100.&quot;    &quot;Horas.Viaje&quot; &quot;D.Vianda&quot;    &quot;Vianda&quot;      &quot;Desarraigo&quot; 
+## [16] &quot;Enfermedad&quot;  &quot;Vacaciones&quot;</code></pre>
 <p>Cambiamos los nombres de las columnas con la funcion “Rename”</p>
 <pre class="r"><code>Novedades &lt;- original %&gt;% 
   rename(&quot;Hs.Extras.50%&quot; = &quot;X50.&quot;)%&gt;% 
   rename(&quot;Hs.Extras.100%&quot; = &quot;X100.&quot;)%&gt;% 
+  rename(&quot;Hs.Feriado&quot; = &quot;X100..FT&quot;)%&gt;% 
   rename(&quot;Hs.Noct&quot; = &quot;Noc&quot;)%&gt;% 
   rename(&quot;Hs.Noct.50%&quot; = &quot;Noc.50.&quot;)%&gt;% 
   rename(&quot;Hs.Noct.100%&quot; = &quot;Noc.100.&quot;)%&gt;%
+  rename(&quot;Hs.Viaje&quot; = &quot;Horas.Viaje&quot;)%&gt;%
+  rename(&quot;2°Vianda&quot; = &quot;D.Vianda&quot;) %&gt;%
   rename(&quot;Centro.Costo&quot; = &quot;CC&quot;) </code></pre>
-<p>Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion “View”</p>
+<p>Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion “View”:</p>
 <pre class="r"><code>view(Novedades)</code></pre>
 <p>Por el alacance del presente proyecto, solo vamos a trabajar con algunas variables, por ello seleccionamos las variables deseadas:</p>
-<pre class="r"><code>Novedades_&lt;- Novedades%&gt;% 
-  select(Legajo, Centro.Costo,  Activo, Fecha.de.Egreso, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )</code></pre>
+<pre class="r"><code>Novedades2&lt;- Novedades%&gt;% 
+  select(Legajo, Centro.Costo,  Activo, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )</code></pre>
 <p>¿ Qué tipo de análisis podemos hacer?</p>
 <p>Aqui tenemos que pensar qué datos son relevantes para el negocio. Mirando con dichos ojos, qué analsis podemos hacer con poca intervencion de código.</p>
 <p>En primer lugar podemos conocer cantidades.</p>
@@ -386,8 +395,11 @@ Nomina</code></pre>
 ##   &lt;chr&gt;   &lt;dbl&gt;
 ## 1 SI         27
 ## 2 NO          4</code></pre>
-<p>Podemos mejorar la visualización con un paquete {Kable}</p>
-<pre class="r"><code>Nomina$TIP &lt;- c(&quot;ver&quot;)
+<p>Podemos mejorar la visualización con el paquete {Kable}</p>
+<ul>
+<li>Aplausos para la maravilla del parametro TIP*</li>
+</ul>
+<pre class="r"><code>Nomina$TIP &lt;- c(&quot;Podemos destacar algo&quot;)
 
 Nomina%&gt;% 
   mutate(Cuenta=text_spec(Cuenta, &quot;html&quot;, tooltip=TIP)) %&gt;% 
@@ -411,7 +423,7 @@ Cuenta
 SI
 </td>
 <td style="text-align:left;">
-<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="ver">27</span>
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Podemos destacar algo">27</span>
 </td>
 </tr>
 <tr>
@@ -419,47 +431,160 @@ SI
 NO
 </td>
 <td style="text-align:left;">
-<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="ver">4</span>
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Podemos destacar algo">4</span>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso. Es posible que dicha información no la tengamos en el mismo archivo, en ese caso, tendremos que hacer unos pasos adicionales para poder unir tablas.</p>
-<p>Continuamos con las variables informadas:</p>
-<p>Definiciones iniciales:</p>
-<p>1° Clasificar conceptos en Fijos, variables, remunerativo, no remunerativo, descuento.</p>
-<p>2° Definir tipos de licencias. En esta oprtunidad, debido al objetivo del proyecto solo creamos 2, enfermedad y vacaciones.</p>
-<p>3° Definir bases de las horas extras</p>
-<p>4° Crear objeto con tope de aportes</p>
-<p>6° Crear acumulados</p>
-<ul>
-<li><p>Enfermedad (fijo + variables 6)</p></li>
-<li><p>Vacaciones ( Fijo + variable 6/12)</p></li>
-</ul>
-<p>7° Ver embargos</p>
-<p>8° Definir perfiles, dentro y fuera de CCT para asigar conceptos de liquidacion</p>
-<p>9° Definir tipos de liquidacion: mensual/ quincenal / final (solo trabajar mensual)</p>
-</div>
-<div id="procesamiento-de-novedades" class="section level2">
-<h2>Procesamiento de novedades:</h2>
-<ul>
-<li>Recibimos las novedades.</li>
-</ul>
-<p>Podemos recibirlo de diferente manera. Ejemplos: (Subir imagenes)..pero el procesamiento es similar… bla</p>
-<ul>
-<li>Limpiamos la base, (tipo variables, nombres, errores…)</li>
-</ul>
-<p>-chequer legajos existentes / nuevos</p>
-<ul>
-<li>Preguntar guia para la liquidacion.</li>
-</ul>
-<p>Es dentro o fuera de convenio?</p>
-<p>Cuantos dias trabajados? (segun fecha de ingreso)</p>
-<p>Tiene licencias?</p>
-<p>Tiene Variables?</p>
-<p>Tiene embargos?</p>
-<p>Esta sindicalizado?</p>
-<p>Tiene descuentos adicionales? (ver)</p>
+<p>Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso.</p>
+<p>Es posible que dicha información no la tengamos en la misma tabla, en ese caso, tendremos que hacer unos pasos adicionales.</p>
+<p>A continuación vamos a ver cómo relacionamos dos tablas. Para hacerlo, necesitamos 1 elemento en común: en nuestro caso será el legajo.</p>
+<p>El resultado: una nueva tabla con la información combinada.</p>
+<p>Primero: consultamos los nombres de las columnas:</p>
+<pre class="r"><code>names(egreso)</code></pre>
+<pre><code>## [1] &quot;Legajo&quot;           &quot;Nombre&quot;           &quot;Fecha.de.Ingreso&quot; &quot;Fecha.de.Egreso&quot; 
+## [5] &quot;Motivo.de.Egreso&quot;</code></pre>
+<pre class="r"><code>names(original)</code></pre>
+<pre><code>##  [1] &quot;Legajo&quot;      &quot;Nombre&quot;      &quot;CC&quot;          &quot;Activo&quot;      &quot;Convenio&quot;   
+##  [6] &quot;X50.&quot;        &quot;X100.&quot;       &quot;X100..FT&quot;    &quot;Noc&quot;         &quot;Noc.50.&quot;    
+## [11] &quot;Noc.100.&quot;    &quot;Horas.Viaje&quot; &quot;D.Vianda&quot;    &quot;Vianda&quot;      &quot;Desarraigo&quot; 
+## [16] &quot;Enfermedad&quot;  &quot;Vacaciones&quot;</code></pre>
+<p>Primero, seleccionamos las columnas de la segunda hoja, con las que vamos a trabajar:</p>
+<pre class="r"><code>egreso2&lt;- egreso%&gt;%
+  select(Legajo, Fecha.de.Ingreso, Fecha.de.Egreso, Motivo.de.Egreso)</code></pre>
+<p>Luego, unimos las tablas por la columna en comun “Legajo” y seleccionamos las columnas deseadas:</p>
+<pre class="r"><code>egreso3 &lt;- left_join(original, egreso, by = &quot;Legajo&quot;)
+
+egreso3&lt;-egreso3%&gt;%
+  select(Legajo:Convenio, Motivo.de.Egreso) %&gt;%   # Usamos rangos, y columnas independientes
+  filter(Activo==&quot;NO&quot;)  %&gt;%  
+  mutate(cuenta = 1) %&gt;% 
+  group_by(Motivo.de.Egreso) %&gt;% 
+  summarise(Cuenta = sum(cuenta)) %&gt;% 
+  arrange(-Cuenta)</code></pre>
+<p>Y luego presentamos la información en una tabla:</p>
+<pre class="r"><code>egreso3$TIP &lt;- c(&quot;Egresos del mes&quot;)
+
+egreso3%&gt;% 
+  mutate(Cuenta=text_spec(Cuenta, &quot;html&quot;, tooltip=TIP)) %&gt;% 
+    select(Motivo.de.Egreso,Cuenta) %&gt;% kable(&quot;html&quot;, escape=F) %&gt;% 
+    kable_styling(full_width = TRUE, bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot; )) %&gt;% 
+row_spec(0, bold=T, color=&quot;white&quot;, background = azul)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: #344D7E !important;">
+Motivo.de.Egreso
+</th>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: #344D7E !important;">
+Cuenta
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Desp C/ Causa
+</td>
+<td style="text-align:left;">
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Egresos del mes">1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Despido con causa
+</td>
+<td style="text-align:left;">
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Egresos del mes">1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Despido sin C
+</td>
+<td style="text-align:left;">
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Egresos del mes">1</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Renuncia
+</td>
+<td style="text-align:left;">
+<span style="     " data-toggle="tooltip" data-container="body" data-placement="right" title="Egresos del mes">1</span>
+</td>
+</tr>
+</tbody>
+</table>
+<p>En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repiten, lo cual implica que hagamos otra limpieza.</p>
+<pre class="r"><code> egreso3&lt;-  egreso2 %&gt;%
+ mutate(Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, &quot;Desp C/C&quot; = c(&quot;Desp C/ Causa&quot;,&quot;Despido con causa&quot;, &quot;Despido C/C&quot;)),
+        Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, &quot;Desp S/C&quot; = c(&quot;Despido sin C&quot;,&quot;Despido sin causa&quot;, &quot;Despido S/C&quot;)))</code></pre>
+<p>AHora si volvemos a presentar la información en una tabla:</p>
+<pre class="r"><code>egreso3$TIP &lt;- c(&quot;Egresos del mes&quot;)
+
+
+egreso3 %&gt;%   # Usamos rangos, y columnas independientes
+  mutate(cuenta = 1) %&gt;% 
+  group_by(Motivo.de.Egreso) %&gt;% 
+  summarise(Cuenta = sum(cuenta)) %&gt;% 
+  arrange(-Cuenta)%&gt;%
+  kable(&quot;html&quot;, escape=F) %&gt;% 
+    kable_styling(full_width = TRUE, bootstrap_options = c(&quot;striped&quot;,&quot;hover&quot;,&quot;condensed&quot; )) %&gt;% 
+row_spec(0, bold=T, color=&quot;white&quot;, background = azul)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: #344D7E !important;">
+Motivo.de.Egreso
+</th>
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: #344D7E !important;">
+Cuenta
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Desp C/C
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Desp S/C
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Renuncia
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+<p>Por último quisieramos saber la cantidad de licencias que tuvimos en el mes. (ver, queda horrible)</p>
+<pre class="r"><code>Novedades2%&gt;% 
+  select(Legajo, Enfermedad, Vacaciones ) %&gt;% 
+  filter(Enfermedad!=0  | Vacaciones!=0) %&gt;%    # operador or
+  mutate(cuenta = 1) %&gt;% 
+  group_by(Enfermedad,Vacaciones)%&gt;% 
+  summarise(Cuenta = sum(cuenta)) %&gt;% 
+  arrange(-Cuenta)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+## # Groups:   Enfermedad [2]
+##   Enfermedad Vacaciones Cuenta
+##        &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;
+## 1          0          7      1
+## 2          0         21      1
+## 3          1          0      1</code></pre>
 </div>
 <div id="dashboard" class="section level2">
 <h2>Dashboard</h2>
@@ -474,7 +599,7 @@ NO
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkFuZXhvIDE6IExpcXVpZGFjacOzbiBkZSBTdWVsZG9zIg0Kc3VidGl0bGU6ICJDb25jZXB0b3MgQsOhc2ljb3MiDQphdXRob3I6ICJZYW5lbCBQYXVsZXR0ZSB5IERpZWdvIFNpcGVzIg0KZGF0ZTogJ1x0b2RheScNCmxpbmtjb2xvcjogYmx1ZQ0KdXJsY29sb3I6IGJsdWUNCm91dHB1dDoNCiAgaHRtbF9kb2N1bWVudDoNCiAgICB0aGVtZTogc3BhY2VsYWINCiAgICB0b2M6IHRydWUNCiAgICB0b2NfZmxvYXQ6IHRydWUNCiAgICBjb2RlX2ZvbGRpbmc6IHNob3cNCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlDQoNCi0tLQ0KDQpOb3RhOiBWb3kgdHJhYmFqYW5kbyBlc3RlIGRvY3VtZW50bywgdm9sY2FuZG8gaWRlYXMgcGFyYSBpciBhcm1hbmRvIGVsIGNvZGlnby4gDQoNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfSANCmtuaXRyOjpvcHRzX2NodW5rJHNldCh3YXJuaW5nID0gRkFMU0UsIG1lc3NhZ2UgPSBGQUxTRSkgDQpgYGANCg0KIyBQcm9jZXNhbWllbnRvIGRlIE5vdmVkYWRlcyBkZSBsaXF1aWRhY2lvbiANCg0KIyNPYmpldGl2b3MNCmNvbXBsZXRhcg0KDQojIyBEZXN0aW5hdGFyaW9zDQpjb21wbGV0YXINCg0KIyMgUHJvY2VkaW1pZW50bw0KDQpQYXJhIGNvbWVuemFyLCBzZSBkZWJlbiByZWFsaXphciBjb25maWd1cmFjaW9uZXMgaW5pY2lhbGVzLCBsYXMgY3VhbGVzIGlyZW4gZGV0YWxsYW5kbyBhIGNvbnRpbnVhY2nDs246IA0KDQoNCiMjIFBhc29zICh2ZXIpDQoNCkluY29ycG9yYW1vcyBsYXMgbGlicmVyaWFzIGEgdXRpbGl6YXINCg0KYGBge3J9DQpsaWJyYXJ5KGZsZXhkYXNoYm9hcmQpDQpsaWJyYXJ5KHRpZHl2ZXJzZSkgICAgICAjIFRyYW5zZm9ybWFyIHkgbGltcGlhciBkYXRvcw0KbGlicmFyeShnb29nbGVzaGVldHM0KSAgIyBMZWVyIGRhdG9zIGRlc2RlIEdvb2dsZSBTaGVldHMNCmxpYnJhcnkoZ2FyZ2xlKSAgICAgICAgICMgQ29ycmVnaXIgbGVjdHVyYSBkZSBzw61tYm9sb3MgZXNwZWNpYWxlcyBkZXNkZSBHb29nbGUgU2hlZXRzDQpsaWJyYXJ5KGd0KSAgICAgICAgICAgICAjIERhciBmb3JtYXRvIGEgbGFzIHRhYmxhcw0KbGlicmFyeShleHRyYWZvbnQpICAgICAgIyBQZXJtaXRlIHV0aWxpemFyIG90cmFzIGZ1ZW50ZXMgZW4gbG9zIGdyw6FmaWNvcyB5IHNhbGlkYXMNCmxpYnJhcnkoZ2d0aGVtZXMpICAgICAgICMgQW1wbMOtYSBsYXMgcG9zaWJpbGlkYWRlcyBlc3TDqXRpY2FzIGRlIGdncGxvdDINCmxpYnJhcnkoc2NhbGVzKSAgICAgICAgICMgUGVybWl0ZSBjYW1iaWFyIGxvcyBmb3JtYXRvcyBkZSBkZWNpbWFsZXMsIGRlIHBvcmNlbnRhamVzLCBldGMuDQpsaWJyYXJ5KGdnYWx0KSAgICAgICAgICAjIE51ZXZvcyB0aXBvcyBkZSBnZW9tIHBhcmEgZ2dwbG90Mi4gUGFyYSByZWFsaXphciBlbCBncsOhZmljbyBkZSBnYXAgc2FsYXJpYWwNCmxpYnJhcnkoZ2dwbG90MikNCmxpYnJhcnkoZnVuTW9kZWxpbmcpICAgICMgUGFyYSBleHBsb3JhciBkYXRvcyB5IG1vZGVsb3MNCmxpYnJhcnkoZm9yY2F0cykNCmxpYnJhcnkoRFQpDQpsaWJyYXJ5KGthYmxlRXh0cmEpDQpsaWJyYXJ5KHRtKQ0KbGlicmFyeShleHBzcykNCmBgYA0KDQpDcmVhbW9zIG9iamV0b3MgcXVlIHZhbW9zIGEgdXRsaXphciBlbiBkaXZlcnNhcyBvcG9ydHVuaWRhZGVzIHkgc29sbyBkZWJlbW9zIGludm9jYXJsb3M6IA0KDQpgYGB7cn0NCiMgRXN0aWxvIGxpbXBpbyBzaW4gbMOtbmVhcyBkZSBmb25kbw0KZXN0aWxvIDwtIHRoZW1lKHBhbmVsLmdyaWQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgcGxvdC5iYWNrZ3JvdW5kID0gZWxlbWVudF9yZWN0KGZpbGwgPSAiI0ZCRkNGQyIpLA0KICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgdGV4dCA9IGVsZW1lbnRfdGV4dChmYW1pbHkgPSAiUm9ib3RvIikpDQoNCiMgRXN0aWxvIGxpbXBpbyBjb24gbMOtbmVhcyBkZSByZWZlcmVuY2lhIHZlcnRpY2FsZXMgZW4gZ3JpcyBjbGFybw0KZXN0aWxvdiA8LSB0aGVtZShwYW5lbC5ncmlkID0gZWxlbWVudF9ibGFuaygpLA0KICAgICAgICAgICAgICAgICBwbG90LmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbCA9ICIjRkJGQ0ZDIiksDQogICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgIHBhbmVsLmdyaWQubWFqb3IueCA9IGVsZW1lbnRfbGluZShjb2xvciA9ICIjQUVCNkJGIiksDQogICAgICAgICAgICAgICAgIHRleHQgPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIlJvYm90byIpKQ0KDQojIEVzdGlsbyBsaW1waW8gY29uIGzDrW5lYXMgZGUgcmVmZXJlbmNpYSBob3Jpem9udGFsZXMgZW4gZ3JpcyBjbGFybw0KZXN0aWxvaCA8LSB0aGVtZShwYW5lbC5ncmlkID0gZWxlbWVudF9ibGFuaygpLA0KICAgICAgICAgICAgICAgICBwbG90LmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbCA9ICIjRkJGQ0ZDIiksDQogICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfbGluZShjb2xvciA9ICIjQUVCNkJGIiksDQogICAgICAgICAgICAgICAgIHRleHQgPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIlJvYm90byIpKQ0KDQojICBvYmpldG9zIHBhcmEgZm9ybWF0ZWFyIGxhcyBldGlxdWV0YXMgbnVtw6lyaWNhcyBkZSBsb3MgZWplcyB4IGUgeQ0KZWplX3hfbiA8LSBzY2FsZV94X2NvbnRpbnVvdXMobGFiZWxzID0gY29tbWFfZm9ybWF0KGJpZy5tYXJrID0gIi4iLCBkZWNpbWFsLm1hcmsgPSAiLCIpKQ0KDQplamVfeV9uIDwtIHNjYWxlX3lfY29udGludW91cyhsYWJlbHMgPSBjb21tYV9mb3JtYXQoYmlnLm1hcmsgPSAiLiIsIGRlY2ltYWwubWFyayA9ICIsIikpDQoNCiNjb2xvcmVzDQoNCmF6dWwgPC0gIiMzNDREN0UiDQp2ZXJkZSA8LSAgIiM0QTlGQzciDQpyb3NhMSA8LSAiI0I5NTE5MiINCnJvc2EyIDwtICIjRUU1Nzc3Ig0KbmFyYW5qYSA8LSAiI0ZGNzY0QyINCmFtYXJpbGxvIDwtICIjRkZBNjAwIg0KZ3JpcyA8LSAiIzc1ODM4RiINCmxpbGEgPC0gIiM3NTUzOTUiDQpyb2pvIDwtICIjOTQzMTI2Ig0KZnVlbnRlIDwtICJGdWVudGU6IEVsYWJvcmFjacOzbiBwcm9waWFTIg0KYGBgDQoNCkluY29ycG9yYW1vcyBsYXMgYmFzZXMgZGUgZGF0b3MgYSB1dGlsaXphcjogDQoNCmBgYHtyfQ0Kb3JpZ2luYWwgPC0gcmVhZF9zaGVldCgiMV9BVURrTWtHODByaWJQUmw3Nk0yS1d0cXdEa19oV2lNN0lPektTWjZOMTQiKQ0KZWdyZXNvIDwtIHJlYWRfc2hlZXQoIjFfQVVEa01rRzgwcmliUFJsNzZNMktXdHF3RGtfaFdpTTdJT3pLU1o2TjE0Iiwgc2hlZXQgPSAiMiIpDQoNCmBgYA0KDQpDb21lbnphbW9zIGNvbiBhbGd1bmFzIGxpbXBpZXphczs6IA0KDQpgYGB7cn0NCiNhZ3JlZ2FyIHB1bnRvcyBhIGxhcyAgY29sdW1uYXM6DQoNCg0KbGltcGlvcyA8LSBtYWtlLm5hbWVzKGNvbG5hbWVzKG9yaWdpbmFsKSkgI2FncmVnYXIgcHVudG9zIGNvbHVtbmFzDQpjb2xuYW1lcyhvcmlnaW5hbCkgPC0gbGltcGlvcw0Kcm0obGltcGlvcykgIyBib3JybyBvYmpldG8NCmBgYA0KDQoNCkNvbnN1bHRhbW9zIGVsIHRhbWHDsW8gZGUgbnVlc3RybyBkYXRhc2V0LiBFbiBlc3RlIGNhc28gdGllbmUgdW5hIGRpbWVuc2lvbiBkZSBgdGFtYcOxb2AsIGNvbiAgYGNvbHVtbmFzYCB5IGNvbiAgYGZpbGFzYC4gQ2FkYSBmaWxhIHJlcHJlc2VudGEgdW5hIHBlcnNvbmEsIHkgY2FkYSBjb2x1bW5hIHVuYSB2YXJpYWJsZS4gDQoNCg0KVmVtb3MgYWhvcmEsICBzaSBsYXMgY29sdW1uYXMgdGllbmVuIG5vbWJyZXMgaW5hZGVjdWFkb3MgcGFyYSAgdHJhYmFqYXIgIHkgYWN0byBzZWd1aWRvIGxvcyBtb2RpZmljYW1vcw0KDQpgYGB7cn0NCiAgbmFtZXMob3JpZ2luYWwpDQpgYGANCg0KQ2FtYmlhbW9zIGxvcyBub21icmVzIGRlIGxhcyBjb2x1bW5hcyBjb24gbGEgZnVuY2lvbiAiUmVuYW1lIg0KDQpgYGB7cn0NCg0KTm92ZWRhZGVzIDwtIG9yaWdpbmFsICU+JSANCiAgcmVuYW1lKCJIcy5FeHRyYXMuNTAlIiA9ICJYNTAuIiklPiUgDQogIHJlbmFtZSgiSHMuRXh0cmFzLjEwMCUiID0gIlgxMDAuIiklPiUgDQogIHJlbmFtZSgiSHMuTm9jdCIgPSAiTm9jIiklPiUgDQogIHJlbmFtZSgiSHMuTm9jdC41MCUiID0gIk5vYy41MC4iKSU+JSANCiAgcmVuYW1lKCJIcy5Ob2N0LjEwMCUiID0gIk5vYy4xMDAuIiklPiUNCiAgcmVuYW1lKCJDZW50cm8uQ29zdG8iID0gIkNDIikgDQoNCg0KYGBgDQoNCg0KVm9sdmVtb3MgYSBjb25zdWx0YXIgZWwgbnVldm8gZGF0YXNldCBjcmVhZG8gYSBmaW4gZGUgY29uZmlybWFyIGxvcyBudWV2b3Mgbm9tYnJlcywgY29uIGxhIGZ1bmNpb24gIlZpZXciDQpgYGB7cn0NCnZpZXcoTm92ZWRhZGVzKQ0KYGBgDQoNClBvciBlbCBhbGFjYW5jZSBkZWwgcHJlc2VudGUgcHJveWVjdG8sIHNvbG8gIHZhbW9zIGEgdHJhYmFqYXIgY29uIGFsZ3VuYXMgdmFyaWFibGVzLCAgcG9yIGVsbG8gc2VsZWNjaW9uYW1vcyBsYXMgdmFyaWFibGVzICBkZXNlYWRhczogDQoNCmBgYHtyfQ0KTm92ZWRhZGVzXzwtIE5vdmVkYWRlcyU+JSANCiAgc2VsZWN0KExlZ2FqbywgQ2VudHJvLkNvc3RvLCAgQWN0aXZvLCBGZWNoYS5kZS5FZ3Jlc28sIENvbnZlbmlvLCBgSHMuRXh0cmFzLjUwJWAsIGBIcy5FeHRyYXMuMTAwJWAsIEhzLk5vY3QsIEVuZmVybWVkYWQsIFZhY2FjaW9uZXMgKQ0KYGBgDQoNCsK/IFF1w6kgdGlwbyBkZSBhbsOhbGlzaXMgcG9kZW1vcyBoYWNlcj8NCg0KQXF1aSB0ZW5lbW9zIHF1ZSBwZW5zYXIgcXXDqSBkYXRvcyBzb24gcmVsZXZhbnRlcyBwYXJhIGVsIG5lZ29jaW8uIE1pcmFuZG8gY29uIGRpY2hvcyBvam9zLCBxdcOpIGFuYWxzaXMgcG9kZW1vcyBoYWNlciBjb24gIHBvY2EgaW50ZXJ2ZW5jaW9uIGRlIGPDs2RpZ28uIA0KDQpFbiBwcmltZXIgbHVnYXIgcG9kZW1vcyBjb25vY2VyIGNhbnRpZGFkZXMuIA0KDQpQb2RlbW9zIGNvbnN1bHRhciBjdWFsIGVzIGxhIG5vbWluYSAgcXVlIHRpZW5lIGFjdHVhbG1lbnRlIGxhIGNvbXBhw7FpYS4gDQoNCmBgYHtyfQ0KTm9taW5hPC0gTm92ZWRhZGVzICU+JSANCiAgc2VsZWN0KEFjdGl2bykgJT4lDQogIG11dGF0ZShjdWVudGEgPSAxKSAlPiUgDQogIGdyb3VwX2J5KEFjdGl2bykgJT4lIA0KICBzdW1tYXJpc2UoQ3VlbnRhID0gc3VtKGN1ZW50YSkpICU+JSANCiAgYXJyYW5nZSgtQ3VlbnRhKQ0KDQpOb21pbmENCg0KYGBgDQoNClBvZGVtb3MgbWVqb3JhciBsYSB2aXN1YWxpemFjacOzbiBjb24gdW4gcGFxdWV0ZSB7S2FibGV9DQoNCmBgYHtyfQ0KDQpOb21pbmEkVElQIDwtIGMoInZlciIpDQoNCk5vbWluYSU+JSANCiAgbXV0YXRlKEN1ZW50YT10ZXh0X3NwZWMoQ3VlbnRhLCAiaHRtbCIsIHRvb2x0aXA9VElQKSkgJT4lIA0KICAgIHNlbGVjdChBY3Rpdm8sQ3VlbnRhKSAlPiUga2FibGUoImh0bWwiLCBlc2NhcGU9RikgJT4lIA0KICAgIGthYmxlX3N0eWxpbmcoZnVsbF93aWR0aCA9IFRSVUUsIGJvb3RzdHJhcF9vcHRpb25zID0gYygic3RyaXBlZCIsImhvdmVyIiwiY29uZGVuc2VkIiApKSAlPiUgDQpyb3dfc3BlYygwLCBib2xkPVQsIGNvbG9yPSJ3aGl0ZSIsIGJhY2tncm91bmQgPSBhenVsKQ0KDQoNCg0KYGBgDQoNCg0KDQoNCkFob3JhIHZlYW1vcyBkZSBhcXVlbGxvcyBxdWUgc29uIGJhamEsIGN1YWxlcyBmdWVyb24gbG9zIG1vdGl2b3MgZGUgZWdyZXNvLiANCkVzIHBvc2libGUgcXVlIGRpY2hhIGluZm9ybWFjacOzbiBubyBsYSB0ZW5nYW1vcyBlbiBlbCBtaXNtbyBhcmNoaXZvLCBlbiBlc2UgY2FzbywgdGVuZHJlbW9zIHF1ZSBoYWNlciAgdW5vcyBwYXNvcyBhZGljaW9uYWxlcyBwYXJhIHBvZGVyIHVuaXIgdGFibGFzLiANCg0KYGBge3J9DQoNCmBgYA0KDQpDb250aW51YW1vcyBjb24gbGFzIHZhcmlhYmxlcyBpbmZvcm1hZGFzOiANCg0KYGBge3J9DQoNCmBgYA0KDQoNCg0KDQoNCkRlZmluaWNpb25lcyBpbmljaWFsZXM6IA0KDQoxwrAgQ2xhc2lmaWNhciBjb25jZXB0b3MgZW4gRmlqb3MsIHZhcmlhYmxlcywgcmVtdW5lcmF0aXZvLCBubyByZW11bmVyYXRpdm8sIGRlc2N1ZW50by4NCg0KMsKwIERlZmluaXIgdGlwb3MgZGUgbGljZW5jaWFzLiBFbiBlc3RhIG9wcnR1bmlkYWQsIGRlYmlkbyBhbCBvYmpldGl2byBkZWwgcHJveWVjdG8gIHNvbG8gY3JlYW1vcyAyLCBlbmZlcm1lZGFkIHkgdmFjYWNpb25lcy4gDQoNCjPCsCBEZWZpbmlyIGJhc2VzIGRlIGxhcyBob3JhcyBleHRyYXMNCg0KNMKwIENyZWFyIG9iamV0byBjb24gdG9wZSBkZSBhcG9ydGVzIA0KDQo2wrAgQ3JlYXIgYWN1bXVsYWRvcw0KDQogLSBFbmZlcm1lZGFkIChmaWpvICsgdmFyaWFibGVzIDYpDQogDQogLSBWYWNhY2lvbmVzICggRmlqbyArIHZhcmlhYmxlIDYvMTIpDQogDQo3wrAgVmVyIGVtYmFyZ29zDQoNCjjCsCBEZWZpbmlyIHBlcmZpbGVzLCBkZW50cm8geSBmdWVyYSBkZSBDQ1QgcGFyYSBhc2lnYXIgY29uY2VwdG9zIGRlIGxpcXVpZGFjaW9uIA0KDQo5wrAgRGVmaW5pciB0aXBvcyBkZSBsaXF1aWRhY2lvbjogbWVuc3VhbC8gcXVpbmNlbmFsICAvIGZpbmFsIChzb2xvIHRyYWJhamFyIG1lbnN1YWwpDQoNCg0KIyMgUHJvY2VzYW1pZW50byBkZSBub3ZlZGFkZXM6IA0KDQotIFJlY2liaW1vcyBsYXMgbm92ZWRhZGVzLiANCg0KUG9kZW1vcyByZWNpYmlybG8gZGUgZGlmZXJlbnRlIG1hbmVyYS4gRWplbXBsb3M6IChTdWJpciBpbWFnZW5lcykuLnBlcm8gZWwgcHJvY2VzYW1pZW50byBlcyBzaW1pbGFyLi4uIGJsYQ0KDQoNCi0gTGltcGlhbW9zIGxhIGJhc2UsICh0aXBvIHZhcmlhYmxlcywgbm9tYnJlcywgZXJyb3Jlcy4uLikNCg0KDQotY2hlcXVlciBsZWdham9zIGV4aXN0ZW50ZXMgLyBudWV2b3MgDQoNCg0KLSBQcmVndW50YXIgZ3VpYSBwYXJhIGxhIGxpcXVpZGFjaW9uLiANCg0KDQpFcyBkZW50cm8gbyBmdWVyYSBkZSBjb252ZW5pbz8NCg0KQ3VhbnRvcyBkaWFzIHRyYWJhamFkb3M/IChzZWd1biBmZWNoYSBkZSBpbmdyZXNvKQ0KDQpUaWVuZSBsaWNlbmNpYXM/IA0KDQpUaWVuZSBWYXJpYWJsZXM/DQoNClRpZW5lIGVtYmFyZ29zPw0KDQpFc3RhIHNpbmRpY2FsaXphZG8/DQoNClRpZW5lIGRlc2N1ZW50b3MgYWRpY2lvbmFsZXM/ICh2ZXIpDQoNCg0KIyMgRGFzaGJvYXJkDQoNClVuYSB2ZXogcXVlIHRlbmVtb3MgdG9kbywgc2ludGV0aXphciBkYXRvcyBlbiB1biB0YWJsZXJvDQoNCi1DYW50aWRhZCBkZSBlbXBsZWFkb3M6DQoNCi1BY3Rpdm9zICAvIG5vIGFjdGl2b3MNCg0KLURlbnRybyAgIC8gZnVlcmEgY2N0DQoNCi1zaW5kaWNhbGl6YWRvcy8gbm8gDQoNCi10b3RhbGVzIGJydXRvIC8gbmV0bw0KDQotdG9jYWwgY2FyZ2FzIHNvY2lhbGVzIEFGSVANCg0KLXRvdGFsIHNpbmRpY2F0byBhIHBhZ2FyDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkFuZXhvIDE6IExpcXVpZGFjacOzbiBkZSBTdWVsZG9zIg0Kc3VidGl0bGU6ICJDb25jZXB0b3MgQsOhc2ljb3MiDQphdXRob3I6ICJZYW5lbCBQYXVsZXR0ZSB5IERpZWdvIFNpcGVzIg0KZGF0ZTogJ1x0b2RheScNCmxpbmtjb2xvcjogYmx1ZQ0KdXJsY29sb3I6IGJsdWUNCm91dHB1dDoNCiAgaHRtbF9kb2N1bWVudDoNCiAgICB0aGVtZTogc3BhY2VsYWINCiAgICB0b2M6IHRydWUNCiAgICB0b2NfZmxvYXQ6IHRydWUNCiAgICBjb2RlX2ZvbGRpbmc6IGhpZGUNCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlDQoNCi0tLQ0KDQpOb3RhOiBWb3kgdHJhYmFqYW5kbyBlc3RlIGRvY3VtZW50bywgdm9sY2FuZG8gaWRlYXMgcGFyYSBpciBhcm1hbmRvIGVsIGNvZGlnby4gDQoNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfSANCmtuaXRyOjpvcHRzX2NodW5rJHNldCh3YXJuaW5nID0gRkFMU0UsIG1lc3NhZ2UgPSBGQUxTRSkgDQpgYGANCg0KIyBQcm9jZXNhbWllbnRvIGRlIE5vdmVkYWRlcyBkZSBsaXF1aWRhY2lvbiANCg0KIyNPYmpldGl2b3MNCmNvbXBsZXRhcg0KDQojIyBEZXN0aW5hdGFyaW9zDQpjb21wbGV0YXINCg0KIyMgUHJvY2VkaW1pZW50bw0KDQpQYXJhIGNvbWVuemFyLCBzZSBkZWJlbiByZWFsaXphciBjb25maWd1cmFjaW9uZXMgaW5pY2lhbGVzLCBsYXMgY3VhbGVzIGlyZW4gZGV0YWxsYW5kbyBhIGNvbnRpbnVhY2nDs246IA0KDQoNCiMjIFBhc29zICh2ZXIpDQoNCkluY29ycG9yYW1vcyBsYXMgbGlicmVyaWFzIGEgdXRpbGl6YXINCg0KYGBge3J9DQpsaWJyYXJ5KGZsZXhkYXNoYm9hcmQpDQpsaWJyYXJ5KHRpZHl2ZXJzZSkgICAgICAjIFRyYW5zZm9ybWFyIHkgbGltcGlhciBkYXRvcw0KbGlicmFyeShnb29nbGVzaGVldHM0KSAgIyBMZWVyIGRhdG9zIGRlc2RlIEdvb2dsZSBTaGVldHMNCmxpYnJhcnkoZ2FyZ2xlKSAgICAgICAgICMgQ29ycmVnaXIgbGVjdHVyYSBkZSBzw61tYm9sb3MgZXNwZWNpYWxlcyBkZXNkZSBHb29nbGUgU2hlZXRzDQpsaWJyYXJ5KGd0KSAgICAgICAgICAgICAjIERhciBmb3JtYXRvIGEgbGFzIHRhYmxhcw0KbGlicmFyeShleHRyYWZvbnQpICAgICAgIyBQZXJtaXRlIHV0aWxpemFyIG90cmFzIGZ1ZW50ZXMgZW4gbG9zIGdyw6FmaWNvcyB5IHNhbGlkYXMNCmxpYnJhcnkoZ2d0aGVtZXMpICAgICAgICMgQW1wbMOtYSBsYXMgcG9zaWJpbGlkYWRlcyBlc3TDqXRpY2FzIGRlIGdncGxvdDINCmxpYnJhcnkoc2NhbGVzKSAgICAgICAgICMgUGVybWl0ZSBjYW1iaWFyIGxvcyBmb3JtYXRvcyBkZSBkZWNpbWFsZXMsIGRlIHBvcmNlbnRhamVzLCBldGMuDQpsaWJyYXJ5KGdnYWx0KSAgICAgICAgICAjIE51ZXZvcyB0aXBvcyBkZSBnZW9tIHBhcmEgZ2dwbG90Mi4gUGFyYSByZWFsaXphciBlbCBncsOhZmljbyBkZSBnYXAgc2FsYXJpYWwNCmxpYnJhcnkoZ2dwbG90MikNCmxpYnJhcnkoZnVuTW9kZWxpbmcpICAgICMgUGFyYSBleHBsb3JhciBkYXRvcyB5IG1vZGVsb3MNCmxpYnJhcnkoZm9yY2F0cykNCmxpYnJhcnkoRFQpDQpsaWJyYXJ5KGthYmxlRXh0cmEpDQpsaWJyYXJ5KHRtKQ0KbGlicmFyeShleHBzcykNCmBgYA0KDQpDcmVhbW9zIG9iamV0b3MgcXVlIHZhbW9zIGEgdXRsaXphciBlbiBkaXZlcnNhcyBvcG9ydHVuaWRhZGVzIHkgc29sbyBkZWJlbW9zIGludm9jYXJsb3M6IA0KDQpgYGB7cn0NCiMgRXN0aWxvIGxpbXBpbyBzaW4gbMOtbmVhcyBkZSBmb25kbw0KZXN0aWxvIDwtIHRoZW1lKHBhbmVsLmdyaWQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgcGxvdC5iYWNrZ3JvdW5kID0gZWxlbWVudF9yZWN0KGZpbGwgPSAiI0ZCRkNGQyIpLA0KICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgdGV4dCA9IGVsZW1lbnRfdGV4dChmYW1pbHkgPSAiUm9ib3RvIikpDQoNCiMgRXN0aWxvIGxpbXBpbyBjb24gbMOtbmVhcyBkZSByZWZlcmVuY2lhIHZlcnRpY2FsZXMgZW4gZ3JpcyBjbGFybw0KZXN0aWxvdiA8LSB0aGVtZShwYW5lbC5ncmlkID0gZWxlbWVudF9ibGFuaygpLA0KICAgICAgICAgICAgICAgICBwbG90LmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbCA9ICIjRkJGQ0ZDIiksDQogICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgIHBhbmVsLmdyaWQubWFqb3IueCA9IGVsZW1lbnRfbGluZShjb2xvciA9ICIjQUVCNkJGIiksDQogICAgICAgICAgICAgICAgIHRleHQgPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIlJvYm90byIpKQ0KDQojIEVzdGlsbyBsaW1waW8gY29uIGzDrW5lYXMgZGUgcmVmZXJlbmNpYSBob3Jpem9udGFsZXMgZW4gZ3JpcyBjbGFybw0KZXN0aWxvaCA8LSB0aGVtZShwYW5lbC5ncmlkID0gZWxlbWVudF9ibGFuaygpLA0KICAgICAgICAgICAgICAgICBwbG90LmJhY2tncm91bmQgPSBlbGVtZW50X3JlY3QoZmlsbCA9ICIjRkJGQ0ZDIiksDQogICAgICAgICAgICAgICAgIHBhbmVsLmJhY2tncm91bmQgPSBlbGVtZW50X2JsYW5rKCksDQogICAgICAgICAgICAgICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfbGluZShjb2xvciA9ICIjQUVCNkJGIiksDQogICAgICAgICAgICAgICAgIHRleHQgPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIlJvYm90byIpKQ0KDQojICBvYmpldG9zIHBhcmEgZm9ybWF0ZWFyIGxhcyBldGlxdWV0YXMgbnVtw6lyaWNhcyBkZSBsb3MgZWplcyB4IGUgeQ0KZWplX3hfbiA8LSBzY2FsZV94X2NvbnRpbnVvdXMobGFiZWxzID0gY29tbWFfZm9ybWF0KGJpZy5tYXJrID0gIi4iLCBkZWNpbWFsLm1hcmsgPSAiLCIpKQ0KDQplamVfeV9uIDwtIHNjYWxlX3lfY29udGludW91cyhsYWJlbHMgPSBjb21tYV9mb3JtYXQoYmlnLm1hcmsgPSAiLiIsIGRlY2ltYWwubWFyayA9ICIsIikpDQoNCiNjb2xvcmVzDQoNCmF6dWwgPC0gIiMzNDREN0UiDQp2ZXJkZSA8LSAgIiM0QTlGQzciDQpyb3NhMSA8LSAiI0I5NTE5MiINCnJvc2EyIDwtICIjRUU1Nzc3Ig0KbmFyYW5qYSA8LSAiI0ZGNzY0QyINCmFtYXJpbGxvIDwtICIjRkZBNjAwIg0KZ3JpcyA8LSAiIzc1ODM4RiINCmxpbGEgPC0gIiM3NTUzOTUiDQpyb2pvIDwtICIjOTQzMTI2Ig0KZnVlbnRlIDwtICJGdWVudGU6IEVsYWJvcmFjacOzbiBwcm9waWFTIg0KYGBgDQoNCkluY29ycG9yYW1vcyBsYXMgYmFzZXMgZGUgZGF0b3MgYSB1dGlsaXphcjogDQoNCmBgYHtyfQ0Kb3JpZ2luYWwgPC0gcmVhZF9zaGVldCgiMV9BVURrTWtHODByaWJQUmw3Nk0yS1d0cXdEa19oV2lNN0lPektTWjZOMTQiKSAjIDHCsCBob2phDQplZ3Jlc28gPC0gcmVhZF9zaGVldCgiMV9BVURrTWtHODByaWJQUmw3Nk0yS1d0cXdEa19oV2lNN0lPektTWjZOMTQiLCBzaGVldCA9ICIyIikgI2xhIDLCsCBob2phDQoNCmBgYA0KDQpDb21lbnphbW9zIGNvbiBhbGd1bmFzIGxpbXBpZXphczs6IA0KDQpgYGB7cn0NCiNhZ3JlZ2FyIHB1bnRvcyBhIGxhcyAgY29sdW1uYXM6DQoNCg0KbGltcGlvcyA8LSBtYWtlLm5hbWVzKGNvbG5hbWVzKG9yaWdpbmFsKSkgI2FncmVnYXIgcHVudG9zIGNvbHVtbmFzDQpjb2xuYW1lcyhvcmlnaW5hbCkgPC0gbGltcGlvcw0Kcm0obGltcGlvcykgIyBib3JybyBvYmpldG8NCg0KI2FncmVnYXIgcHVudG9zIGEgbGFzICBjb2x1bW5hczoNCg0KDQpsaW1waW9zIDwtIG1ha2UubmFtZXMoY29sbmFtZXMoZWdyZXNvKSkgI2FncmVnYXIgcHVudG9zIGNvbHVtbmFzDQpjb2xuYW1lcyhlZ3Jlc28pIDwtIGxpbXBpb3MNCnJtKGxpbXBpb3MpICMgYm9ycm8gb2JqZXRvDQoNCmBgYA0KDQoNCkNvbnN1bHRhbW9zIGVsIHRhbWHDsW8gZGUgbnVlc3RybyBkYXRhc2V0LiBFbiBlc3RlIGNhc28gdGllbmUgdW5hIGRpbWVuc2lvbiBkZSBgdGFtYcOxb2AsIGNvbiAgYGNvbHVtbmFzYCB5IGNvbiAgYGZpbGFzYC4gQ2FkYSBmaWxhIHJlcHJlc2VudGEgdW5hIHBlcnNvbmEsIHkgY2FkYSBjb2x1bW5hIHVuYSB2YXJpYWJsZS4gDQoNCg0KVmVtb3MgYWhvcmEsICBzaSBsYXMgY29sdW1uYXMgdGllbmVuIG5vbWJyZXMgaW5hZGVjdWFkb3MgcGFyYSAgdHJhYmFqYXIgIHkgYWN0byBzZWd1aWRvIGxvcyBtb2RpZmljYW1vcw0KDQpgYGB7cn0NCm5hbWVzKG9yaWdpbmFsKQ0KYGBgDQoNCkNhbWJpYW1vcyBsb3Mgbm9tYnJlcyBkZSBsYXMgY29sdW1uYXMgY29uIGxhIGZ1bmNpb24gIlJlbmFtZSINCg0KYGBge3J9DQoNCk5vdmVkYWRlcyA8LSBvcmlnaW5hbCAlPiUgDQogIHJlbmFtZSgiSHMuRXh0cmFzLjUwJSIgPSAiWDUwLiIpJT4lIA0KICByZW5hbWUoIkhzLkV4dHJhcy4xMDAlIiA9ICJYMTAwLiIpJT4lIA0KICByZW5hbWUoIkhzLkZlcmlhZG8iID0gIlgxMDAuLkZUIiklPiUgDQogIHJlbmFtZSgiSHMuTm9jdCIgPSAiTm9jIiklPiUgDQogIHJlbmFtZSgiSHMuTm9jdC41MCUiID0gIk5vYy41MC4iKSU+JSANCiAgcmVuYW1lKCJIcy5Ob2N0LjEwMCUiID0gIk5vYy4xMDAuIiklPiUNCiAgcmVuYW1lKCJIcy5WaWFqZSIgPSAiSG9yYXMuVmlhamUiKSU+JQ0KICByZW5hbWUoIjLCsFZpYW5kYSIgPSAiRC5WaWFuZGEiKSAlPiUNCiAgcmVuYW1lKCJDZW50cm8uQ29zdG8iID0gIkNDIikgDQoNCg0KYGBgDQoNCg0KVm9sdmVtb3MgYSBjb25zdWx0YXIgZWwgbnVldm8gZGF0YXNldCBjcmVhZG8gYSBmaW4gZGUgY29uZmlybWFyIGxvcyBudWV2b3Mgbm9tYnJlcywgY29uIGxhIGZ1bmNpb24gIlZpZXciOg0KDQpgYGB7cn0NCnZpZXcoTm92ZWRhZGVzKQ0KYGBgDQoNClBvciBlbCBhbGFjYW5jZSBkZWwgcHJlc2VudGUgcHJveWVjdG8sIHNvbG8gIHZhbW9zIGEgdHJhYmFqYXIgY29uIGFsZ3VuYXMgdmFyaWFibGVzLCAgcG9yIGVsbG8gc2VsZWNjaW9uYW1vcyBsYXMgdmFyaWFibGVzICBkZXNlYWRhczogDQoNCmBgYHtyfQ0KTm92ZWRhZGVzMjwtIE5vdmVkYWRlcyU+JSANCiAgc2VsZWN0KExlZ2FqbywgQ2VudHJvLkNvc3RvLCAgQWN0aXZvLCBDb252ZW5pbywgYEhzLkV4dHJhcy41MCVgLCBgSHMuRXh0cmFzLjEwMCVgLCBIcy5Ob2N0LCBFbmZlcm1lZGFkLCBWYWNhY2lvbmVzICkNCmBgYA0KDQrCvyBRdcOpIHRpcG8gZGUgYW7DoWxpc2lzIHBvZGVtb3MgaGFjZXI/DQoNCkFxdWkgdGVuZW1vcyBxdWUgcGVuc2FyIHF1w6kgZGF0b3Mgc29uIHJlbGV2YW50ZXMgcGFyYSBlbCBuZWdvY2lvLiANCk1pcmFuZG8gY29uIGRpY2hvcyBvam9zLCBxdcOpIGFuYWxzaXMgcG9kZW1vcyBoYWNlciBjb24gIHBvY2EgaW50ZXJ2ZW5jaW9uIGRlIGPDs2RpZ28uIA0KDQpFbiBwcmltZXIgbHVnYXIgcG9kZW1vcyBjb25vY2VyIGNhbnRpZGFkZXMuIA0KDQpQb2RlbW9zIGNvbnN1bHRhciBjdWFsIGVzIGxhIG5vbWluYSAgcXVlIHRpZW5lIGFjdHVhbG1lbnRlIGxhIGNvbXBhw7FpYS4gDQoNCmBgYHtyfQ0KTm9taW5hPC0gTm92ZWRhZGVzICU+JSANCiAgc2VsZWN0KEFjdGl2bykgJT4lDQogIG11dGF0ZShjdWVudGEgPSAxKSAlPiUgDQogIGdyb3VwX2J5KEFjdGl2bykgJT4lIA0KICBzdW1tYXJpc2UoQ3VlbnRhID0gc3VtKGN1ZW50YSkpICU+JSANCiAgYXJyYW5nZSgtQ3VlbnRhKQ0KDQpOb21pbmENCg0KYGBgDQoNClBvZGVtb3MgbWVqb3JhciBsYSB2aXN1YWxpemFjacOzbiBjb24gZWwgcGFxdWV0ZSB7S2FibGV9DQoNCiogQXBsYXVzb3MgcGFyYSBsYSBtYXJhdmlsbGEgZGVsIHBhcmFtZXRybyBUSVAqDQoNCmBgYHtyfQ0KDQpOb21pbmEkVElQIDwtIGMoIlBvZGVtb3MgZGVzdGFjYXIgYWxnbyIpDQoNCk5vbWluYSU+JSANCiAgbXV0YXRlKEN1ZW50YT10ZXh0X3NwZWMoQ3VlbnRhLCAiaHRtbCIsIHRvb2x0aXA9VElQKSkgJT4lIA0KICAgIHNlbGVjdChBY3Rpdm8sQ3VlbnRhKSAlPiUga2FibGUoImh0bWwiLCBlc2NhcGU9RikgJT4lIA0KICAgIGthYmxlX3N0eWxpbmcoZnVsbF93aWR0aCA9IFRSVUUsIGJvb3RzdHJhcF9vcHRpb25zID0gYygic3RyaXBlZCIsImhvdmVyIiwiY29uZGVuc2VkIiApKSAlPiUgDQpyb3dfc3BlYygwLCBib2xkPVQsIGNvbG9yPSJ3aGl0ZSIsIGJhY2tncm91bmQgPSBhenVsKQ0KDQoNCg0KYGBgDQoNCg0KDQpBaG9yYSB2ZWFtb3MgZGUgYXF1ZWxsb3MgcXVlIHNvbiBiYWphLCBjdWFsZXMgZnVlcm9uIGxvcyBtb3Rpdm9zIGRlIGVncmVzby4gDQoNCkVzIHBvc2libGUgcXVlIGRpY2hhIGluZm9ybWFjacOzbiBubyBsYSB0ZW5nYW1vcyBlbiBsYSBtaXNtYSB0YWJsYSwgZW4gZXNlIGNhc28sIHRlbmRyZW1vcyBxdWUgaGFjZXIgIHVub3MgcGFzb3MgYWRpY2lvbmFsZXMuIA0KDQpBIGNvbnRpbnVhY2nDs24gdmFtb3MgYSB2ZXIgY8OzbW8gcmVsYWNpb25hbW9zIGRvcyB0YWJsYXMuIFBhcmEgaGFjZXJsbywgbmVjZXNpdGFtb3MgMSBlbGVtZW50byBlbiBjb23Dum46IGVuIG51ZXN0cm8gY2FzbyBzZXLDoSBlbCBsZWdham8uIA0KDQpFbCByZXN1bHRhZG86ICB1bmEgbnVldmEgdGFibGEgY29uIGxhIGluZm9ybWFjacOzbiBjb21iaW5hZGEuDQoNClByaW1lcm86IGNvbnN1bHRhbW9zIGxvcyBub21icmVzIGRlIGxhcyBjb2x1bW5hczogDQpgYGB7cn0NCm5hbWVzKGVncmVzbykNCm5hbWVzKG9yaWdpbmFsKQ0KDQpgYGANCg0KUHJpbWVybywgc2VsZWNjaW9uYW1vcyBsYXMgY29sdW1uYXMgZGUgbGEgc2VndW5kYSBob2phLCBjb24gbGFzIHF1ZSB2YW1vcyBhIHRyYWJhamFyOiANCg0KYGBge3J9DQplZ3Jlc28yPC0gZWdyZXNvJT4lDQogIHNlbGVjdChMZWdham8sIEZlY2hhLmRlLkluZ3Jlc28sIEZlY2hhLmRlLkVncmVzbywgTW90aXZvLmRlLkVncmVzbykNCg0KYGBgDQoNCkx1ZWdvLCB1bmltb3MgbGFzIHRhYmxhcyBwb3IgbGEgY29sdW1uYSBlbiBjb211biAiTGVnYWpvIiB5IHNlbGVjY2lvbmFtb3MgbGFzIGNvbHVtbmFzIGRlc2VhZGFzOiANCg0KYGBge3J9DQoNCmVncmVzbzMgPC0gbGVmdF9qb2luKG9yaWdpbmFsLCBlZ3Jlc28sIGJ5ID0gIkxlZ2FqbyIpDQoNCmVncmVzbzM8LWVncmVzbzMlPiUNCiAgc2VsZWN0KExlZ2FqbzpDb252ZW5pbywgTW90aXZvLmRlLkVncmVzbykgJT4lICAgIyBVc2Ftb3MgcmFuZ29zLCB5IGNvbHVtbmFzIGluZGVwZW5kaWVudGVzDQogIGZpbHRlcihBY3Rpdm89PSJOTyIpICAlPiUgIA0KICBtdXRhdGUoY3VlbnRhID0gMSkgJT4lIA0KICBncm91cF9ieShNb3Rpdm8uZGUuRWdyZXNvKSAlPiUgDQogIHN1bW1hcmlzZShDdWVudGEgPSBzdW0oY3VlbnRhKSkgJT4lIA0KICBhcnJhbmdlKC1DdWVudGEpDQoNCg0KDQpgYGANCg0KWSBsdWVnbyBwcmVzZW50YW1vcyBsYSBpbmZvcm1hY2nDs24gIGVuIHVuYSB0YWJsYTogDQoNCg0KDQoNCmBgYHtyfQ0KDQplZ3Jlc28zJFRJUCA8LSBjKCJFZ3Jlc29zIGRlbCBtZXMiKQ0KDQplZ3Jlc28zJT4lIA0KICBtdXRhdGUoQ3VlbnRhPXRleHRfc3BlYyhDdWVudGEsICJodG1sIiwgdG9vbHRpcD1USVApKSAlPiUgDQogICAgc2VsZWN0KE1vdGl2by5kZS5FZ3Jlc28sQ3VlbnRhKSAlPiUga2FibGUoImh0bWwiLCBlc2NhcGU9RikgJT4lIA0KICAgIGthYmxlX3N0eWxpbmcoZnVsbF93aWR0aCA9IFRSVUUsIGJvb3RzdHJhcF9vcHRpb25zID0gYygic3RyaXBlZCIsImhvdmVyIiwiY29uZGVuc2VkIiApKSAlPiUgDQpyb3dfc3BlYygwLCBib2xkPVQsIGNvbG9yPSJ3aGl0ZSIsIGJhY2tncm91bmQgPSBhenVsKQ0KDQpgYGANCg0KRW4gZWwgY3VhZHJvIGFudGVyaW9yLCB2ZW1vcyBxdWUgbG9zIG5vbWJyZXMgZGUgbG9zIG1vdGl2b3MgZGUgZWdyZXNvLCBzZSByZXBpdGVuLCBsbyBjdWFsIGltcGxpY2EgcXVlIGhhZ2Ftb3Mgb3RyYSBsaW1waWV6YS4gDQoNCmBgYHtyfQ0KIGVncmVzbzM8LSAgZWdyZXNvMiAlPiUNCiBtdXRhdGUoTW90aXZvLmRlLkVncmVzbyA9IGZjdF9jb2xsYXBzZShNb3Rpdm8uZGUuRWdyZXNvLCAiRGVzcCBDL0MiID0gYygiRGVzcCBDLyBDYXVzYSIsIkRlc3BpZG8gY29uIGNhdXNhIiwgIkRlc3BpZG8gQy9DIikpLA0KICAgICAgICBNb3Rpdm8uZGUuRWdyZXNvID0gZmN0X2NvbGxhcHNlKE1vdGl2by5kZS5FZ3Jlc28sICJEZXNwIFMvQyIgPSBjKCJEZXNwaWRvIHNpbiBDIiwiRGVzcGlkbyBzaW4gY2F1c2EiLCAiRGVzcGlkbyBTL0MiKSkpDQpgYGANCg0KQUhvcmEgc2kgdm9sdmVtb3MgYSBwcmVzZW50YXIgbGEgaW5mb3JtYWNpw7NuIGVuIHVuYSB0YWJsYTogDQoNCg0KYGBge3J9DQplZ3Jlc28zJFRJUCA8LSBjKCJFZ3Jlc29zIGRlbCBtZXMiKQ0KDQoNCmVncmVzbzMgJT4lICAgIyBVc2Ftb3MgcmFuZ29zLCB5IGNvbHVtbmFzIGluZGVwZW5kaWVudGVzDQogIG11dGF0ZShjdWVudGEgPSAxKSAlPiUgDQogIGdyb3VwX2J5KE1vdGl2by5kZS5FZ3Jlc28pICU+JSANCiAgc3VtbWFyaXNlKEN1ZW50YSA9IHN1bShjdWVudGEpKSAlPiUgDQogIGFycmFuZ2UoLUN1ZW50YSklPiUNCiAga2FibGUoImh0bWwiLCBlc2NhcGU9RikgJT4lIA0KICAgIGthYmxlX3N0eWxpbmcoZnVsbF93aWR0aCA9IFRSVUUsIGJvb3RzdHJhcF9vcHRpb25zID0gYygic3RyaXBlZCIsImhvdmVyIiwiY29uZGVuc2VkIiApKSAlPiUgDQpyb3dfc3BlYygwLCBib2xkPVQsIGNvbG9yPSJ3aGl0ZSIsIGJhY2tncm91bmQgPSBhenVsKQ0KDQpgYGANCg0KUG9yIMO6bHRpbW8gcXVpc2llcmFtb3Mgc2FiZXIgbGEgY2FudGlkYWQgZGUgbGljZW5jaWFzIHF1ZSB0dXZpbW9zIGVuIGVsIG1lcy4gKHZlciwgcXVlZGEgaG9ycmlibGUpDQoNCg0KYGBge3J9DQpOb3ZlZGFkZXMyJT4lIA0KICBzZWxlY3QoTGVnYWpvLCBFbmZlcm1lZGFkLCBWYWNhY2lvbmVzICkgJT4lIA0KICBmaWx0ZXIoRW5mZXJtZWRhZCE9MCAgfCBWYWNhY2lvbmVzIT0wKSAlPiUgICAgIyBvcGVyYWRvciBvcg0KICBtdXRhdGUoY3VlbnRhID0gMSkgJT4lIA0KICBncm91cF9ieShFbmZlcm1lZGFkLFZhY2FjaW9uZXMpJT4lIA0KICBzdW1tYXJpc2UoQ3VlbnRhID0gc3VtKGN1ZW50YSkpICU+JSANCiAgYXJyYW5nZSgtQ3VlbnRhKQ0KDQoNCg0KYGBgDQoNCg0KIyMgRGFzaGJvYXJkDQoNClVuYSB2ZXogcXVlIHRlbmVtb3MgdG9kbywgc2ludGV0aXphciBkYXRvcyBlbiB1biB0YWJsZXJvDQoNCi1DYW50aWRhZCBkZSBlbXBsZWFkb3M6DQoNCi1BY3Rpdm9zICAvIG5vIGFjdGl2b3MNCg0KLURlbnRybyAgIC8gZnVlcmEgY2N0DQoNCi1zaW5kaWNhbGl6YWRvcy8gbm8gDQoNCi10b3RhbGVzIGJydXRvIC8gbmV0bw0KDQotdG9jYWwgY2FyZ2FzIHNvY2lhbGVzIEFGSVANCg0KLXRvdGFsIHNpbmRpY2F0byBhIHBhZ2FyDQoNCg==</div>
 
 
 </div>
@@ -513,7 +638,7 @@ $(document).ready(function () {
 <script>
 $(document).ready(function () {
   window.initializeSourceEmbed("ProcesamientoNovedades.rmd");
-  window.initializeCodeFolding("show" === "show");
+  window.initializeCodeFolding("hide" === "show");
 });
 </script>
 
