@@ -27,11 +27,11 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 completar
 
 ## Destinatarios
-completar
+completar : rrhh q trabajen con novedades de liq 
 
 ## Procedimiento
 
-Para comenzar, se deben realizar configuraciones iniciales, las cuales iren detallando a continuación: 
+Para comenzar, se deben realizar configuraciones iniciales, las cuales iremo detallando a continuación: 
 
 
 ## Pasos (ver)
@@ -99,7 +99,10 @@ rojo <- "#943126"
 fuente <- "Fuente: Elaboración propiaS"
 ```
 
-Incorporamos las bases de datos a utilizar: 
+##### Primer Ejemplo de Novedades #### 
+
+
+Incorporamos las bases de datos a utilizar, desde el drive. 
 
 ```{r}
 original <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
@@ -125,6 +128,7 @@ colnames(egreso) <- limpios
 rm(limpios) # borro objeto
 
 ```
+
 
 
 Consultamos el tamaño de nuestro dataset. En este caso tiene una dimension de `tamaño`, con  `columnas` y con  `filas`. Cada fila representa una persona, y cada columna una variable. 
@@ -257,7 +261,7 @@ Y luego presentamos la información  en una tabla:
 
 ```{r}
 
-egreso3$TIP <- c("Egresos del mes")
+egreso3$TIP <- c("Egresos del mes") 
 
 egreso3%>% 
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
@@ -308,9 +312,40 @@ Novedades2%>%
 
 
 ```
+##### Segundo Ejemplo de Novedades #### 
 
 
-## Dashboard
+
+Incorporamos las bases de datos a utilizar, desde el drive. 
+
+```{r}
+original2 <- read_sheet("1itmsK2S4fE2DPQT2VkM-D-4ZWec1HrK8") # 1° hoja
+
+```
+
+Comenzamos con algunas limpiezas;: 
+
+```{r}
+#agregar puntos a las  columnas:
+
+
+limpios <- make.names(colnames(original)) #agregar puntos columnas
+colnames(original) <- limpios
+rm(limpios) # borro objeto
+
+#agregar puntos a las  columnas:
+
+
+limpios <- make.names(colnames(egreso)) #agregar puntos columnas
+colnames(egreso) <- limpios
+rm(limpios) # borro objeto
+
+```
+
+
+
+
+#### Dashboard #### 
 
 Una vez que tenemos todo, sintetizar datos en un tablero
 

@@ -23,6 +23,8 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 Nuestro nuevo dataset, solo tiene ...
 
 
+
+
 ## << Borrador >>
 
 ## Presentación 
