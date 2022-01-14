@@ -21,7 +21,7 @@ Nota: Voy trabajando este documento, volcando ideas para ir armando el codigo.
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
-# Procesamiento de Novedades de liquidacion 
+#### Procesamiento de Novedades de liquidacion  #####
 
 ##Objetivos
 completar
@@ -55,6 +55,10 @@ library(DT)
 library(kableExtra)
 library(tm)
 library(expss)
+library(lubridate) # para las fechas
+library(datos)
+
+
 ```
 
 Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos: 
@@ -319,29 +323,99 @@ Novedades2%>%
 Incorporamos las bases de datos a utilizar, desde el drive. 
 
 ```{r}
-original2 <- read_sheet("1itmsK2S4fE2DPQT2VkM-D-4ZWec1HrK8") # 1° hoja
+original2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1) # 1° hoja, salto la hoja 1
 
 ```
 
-Comenzamos con algunas limpiezas;: 
+para manipularlo: 
+
 
 ```{r}
-#agregar puntos a las  columnas:
+
+n2 <-original2
+```
+
+Pivotear: 
+
+```{r}
+ 
+n2<- n2 %>%
+  pivot_longer(cols = c(`16/12/2021`:`31/12/2021`), names_to = "Fecha", values_to = "Horario")
 
 
-limpios <- make.names(colnames(original)) #agregar puntos columnas
-colnames(original) <- limpios
-rm(limpios) # borro objeto
+```
+Fechas
 
-#agregar puntos a las  columnas:
+```{r}
+n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") # Cambie formato 
+glimpse(n2)
 
+n2 <- n2 %>% 
+  mutate(Fecha = mdy(Fecha))
 
-limpios <- make.names(colnames(egreso)) #agregar puntos columnas
-colnames(egreso) <- limpios
-rm(limpios) # borro objeto
+class(n2$Fecha)
 
 ```
 
+
+Modificamos las columnas; 
+
+```{r}
+
+limpios <- make.names(colnames(n2)) 
+colnames(n2) <- limpios
+rm(limpios)
+head(n2)
+```
+Cambiamos los nombres a las columnas: 
+
+
+```{r}
+
+n2 <- n2 %>% 
+  rename("Legajo" = "N.Legajo")%>%
+  rename("Agrupación1" = "Mens...Jorn")%>%
+  rename("Agrupación2" = "Sector")
+
+head(n2)
+```
+
+
+Pasamos a factor las catgeoria que despues vamos a categorizar.. y confirmamos el cambio: 
+
+```{r}
+n2 <- n2 %>%
+mutate(`Agrupación1` = factor(`Agrupación1`))%>%
+mutate(`Agrupación2` = factor(`Agrupación2`))
+
+head(n2)
+```
+
+Unimos las columnas de Nombre y Apellido y eliminamos dichas columnas, individuales: 
+
+
+```{r}
+
+
+n2<- within(n2, 'Apynom' <- paste(Apellido, Apellido, sep=' '))
+
+
+n2<- n2 %>%
+  select('Legajo', 'Apynom',everything()) %>%
+  #select(-Apellido, -Nombre) %>%
+  arrange(Apynom)
+
+head(n2)
+
+
+```
+`
+
+Pasar a Mayusculas: 
+
+```{r}
+
+```
 
 
 
