@@ -335,6 +335,19 @@ para manipularlo:
 n2 <-original2
 ```
 
+
+Pasar a Mayusculas: 
+
+```{r}
+
+n2 <- mutate_if(n2, is.factor, toupper)
+n2 <- mutate_if(n2, is.character, toupper)
+n2
+
+```
+
+
+
 Pivotear: 
 
 ```{r}
@@ -344,16 +357,29 @@ n2<- n2 %>%
 
 
 ```
+
+Eliminamos la primer tanda de columnas: 
+
+```{r}
+ 
+n2<- n2 %>%
+  select(everything()) %>%
+  select(-Sem1:-Sem5)
+
+```
+
+
+
+
 Fechas
 
 ```{r}
 n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") # Cambie formato 
-glimpse(n2)
 
 n2 <- n2 %>% 
   mutate(Fecha = mdy(Fecha))
 
-class(n2$Fecha)
+glimpse(n2)
 
 ```
 
@@ -402,18 +428,10 @@ n2<- within(n2, 'Apynom' <- paste(Apellido, Apellido, sep=' '))
 
 n2<- n2 %>%
   select('Legajo', 'Apynom',everything()) %>%
-  #select(-Apellido, -Nombre) %>%
+  select(-Apellido, -Nombre) %>%
   arrange(Apynom)
-
 head(n2)
 
-
-```
-`
-
-Pasar a Mayusculas: 
-
-```{r}
 
 ```
 
