@@ -331,7 +331,6 @@ para manipularlo:
 
 
 ```{r}
-
 n2 <-original2
 ```
 
@@ -434,6 +433,34 @@ head(n2)
 
 
 ```
+Le agregamos el dia de la semana
+
+```{r}
+
+n2 <- n2 %>%
+mutate(`Día` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
+
+n2
+
+
+
+```
+
+Apertura horaria: 
+
+```{r}
+
+n2 <- n2 %>%
+  mutate%>%
+  separate(Horario,c("Entrada","Salida"), sep=" A ",extra="merge",fill="left")
+
+glimpse(n2)
+
+
+```
+
+
+transformar hora 
 
 
 
