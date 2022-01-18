@@ -348,7 +348,7 @@ n2 <- mutate_if(n2, is.character, toupper)
 
 
 
-Pivotear: 
+Pivotar: 
 
 ```{r}
  
@@ -519,7 +519,9 @@ n2$Licencia<- gsub("10 A 20", " ", n2$Licencia)
 n2$Licencia<- gsub("18:40 A 06", " ", n2$Licencia)
 n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
 n2$Licencia<- gsub("20 A 06", " ", n2$Licencia)
-
+n2$Licencia<- gsub(":49", " ", n2$Licencia)
+n2$Licencia<- gsub("06:25 A 12", " ", n2$Licencia)
+n2$Licencia<- gsub("06:25 A 12", " ", n2$Licencia)
 
 
 
@@ -583,6 +585,133 @@ mutate(Noc = if_else(Salida >21, (Salida-21),
              if_else(Entrada >21,(24-Entrada)+(0+Salida),0))) # se podria trabajar aun mas
                      
                   
+
+```
+
+Feriados: 
+
+```{r}
+
+calendario <- data.frame(
+  date = seq(ymd("2021-12-01"), ymd("2021-12-31"), by = 1), evento = 0)
+
+
+feriados <- c(ymd("2021-12-25"), ymd("2021-12-08"))
+
+calendario[calendario$date %in% feriados, "evento"] <- "Feriado" 
+
+calendario <- calendario %>% 
+  rename("Fecha" = "date") 
+
+
+```
+
+relaciono tablas
+
+```{r}
+
+n2<-left_join(n2, calendario, by = "Fecha")
+
+n2 <- n2 %>% 
+  rename("Feriado" = "evento") 
+
+
+```
+
+Si trabajo un feriado, remplazo las horas trabajadas, en dicha columna: 
+
+```{r}
+
+n2<- n2 %>%
+mutate(Feriado = if_else(Feriado == "Feriado" & Entrada>0,Salida-Entrada,0))
+
+#No hay feriados en la base original
+n2 %>%
+  select(Legajo,Fecha,Feriado)%>%
+  filter(Feriado>0)
+
+
+```
+
+pivotar licencia: 
+
+```{r}
+#consulto las lic
+
+n2%>%
+  select(Licencia) %>%
+  mutate(cuenta = 1) %>% 
+  group_by(Licencia) %>% 
+  summarise(Cuenta = sum(cuenta)) %>% 
+  arrange(-Cuenta)
+
+#######
+#Para saber los que no son licencia: 
+  
+n2%>%
+ filter(Licencia!=" ")%>%
+ filter(Licencia!= "NA")%>%
+ filter(Licencia!= "") %>%
+ mutate(cuenta = 1) %>% 
+ summarise(Cuenta = sum(cuenta)) %>% 
+ arrange(-Cuenta)
+
+######
+#quiero las licencias en columnas, salen mal porque esta mal desde el inicio, #arreglar
+
+
+n2<-n2%>%
+ mutate(cuenta = 1)
+
+
+n2<-n2  %>% 
+pivot_wider(names_from = Licencia, values_from = cuenta)
+
+glimpse(n2)
+
+n2<-n2 %>% 
+  select(-` ` )  %>% 
+  select(-`NA` )   %>% 
+  select(-`07: ` )   %>% 
+  select(-`  `  )   %>% 
+  select(-`07:05 A 18` )%>%
+  select(-`06: `   )  
+
+glimpse(n2)
+
+```
+
+
+#agregar puntos a las  columnas:
+```{r}
+limpios <- make.names(colnames(n2)) #agregar puntos columnas
+colnames(n2) <- limpios
+rm(limpios) # borro objeto
+glimpse(n2)
+```
+
+
+pivotar, para armar el ingreso masivo: 
+
+
+```{r}
+
+
+n3<-n2 %>%
+  pivot_longer(cols = c(`hs50`:`Calent`), names_to = "concepto", values_to = "cantidad")%>%
+    select(Legajo, Apynom,Fecha,  Agrupación1,Agrupación2, concepto, cantidad )%>%
+  filter(cantidad>0)
+
+```
+
+Ingreso MAsivo:
+```{r}
+
+n3 %>%
+  select(Legajo, concepto,  cantidad) %>%
+  group_by(Legajo,concepto) %>%
+  summarise(Cantidad = sum(cantidad))
+
 
 ```
 
