@@ -1,7 +1,7 @@
 ---
 title: "Anexo 1: Liquidación de Sueldos"
 subtitle: "Conceptos Básicos"
-author: "Yanel Paulette y Diego Sipes"
+author: "Yanel Paulette"
 date: '\today'
 linkcolor: blue
 urlcolor: blue
