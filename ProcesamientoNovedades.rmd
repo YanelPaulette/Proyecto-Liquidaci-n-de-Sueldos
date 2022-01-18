@@ -57,6 +57,7 @@ library(tm)
 library(expss)
 library(lubridate) # para las fechas
 library(datos)
+library( hms)
 
 
 ```
@@ -332,6 +333,7 @@ para manipularlo:
 
 ```{r}
 n2 <-original2
+#rm(n2)
 ```
 
 
@@ -341,7 +343,6 @@ Pasar a Mayusculas:
 
 n2 <- mutate_if(n2, is.factor, toupper)
 n2 <- mutate_if(n2, is.character, toupper)
-n2
 
 ```
 
@@ -353,7 +354,6 @@ Pivotear:
  
 n2<- n2 %>%
   pivot_longer(cols = c(`16/12/2021`:`31/12/2021`), names_to = "Fecha", values_to = "Horario")
-
 
 ```
 
@@ -397,6 +397,7 @@ Cambiamos los nombres a las columnas:
 
 ```{r}
 
+
 n2 <- n2 %>% 
   rename("Legajo" = "N.Legajo")%>%
   rename("Agrupación1" = "Mens...Jorn")%>%
@@ -438,7 +439,7 @@ Le agregamos el dia de la semana
 ```{r}
 
 n2 <- n2 %>%
-mutate(`Día` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
+mutate(`Dia` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
 
 n2
 
@@ -446,39 +447,142 @@ n2
 
 ```
 
-Apertura horaria: 
-
+Licencias: 
 ```{r}
+n2<- n2 %>%
+  mutate(Licencia=Horario)
 
-n2 <- n2 %>%
-  mutate%>%
-  separate(Horario,c("Entrada","Salida"), sep=" A ",extra="merge",fill="left")
+n2$Licencia<-as.factor(n2$Licencia)
 
-glimpse(n2)
+
+n2<- n2%>%
+  mutate(Licencia= str_trim(Licencia,side = "both"),
+         Licencia =  fct_collapse(Licencia, "Vacaciones" = "VAC"),
+         Licencia =  fct_collapse(Licencia, "Enfermedad" = "ENFERMO"),
+         Licencia =  fct_collapse(Licencia, "Aus C/A" = "AUS C/ AVISO"),
+         Licencia =  fct_collapse(Licencia, "Aus C/P" = "AUS C/ PERM"),
+         Licencia =  fct_collapse(Licencia, "Aus S/A" = "AUS S/ AVISO"),
+         Licencia =  fct_collapse(Licencia, "Vacunación" = "VACUNACION"),
+         Licencia =  fct_collapse(Licencia, "Calent" = c("CALENT 4 HS","CALENT 4HS")))
+
+
+#Esto es horrible,  ver como hacerlo bien: 
+
+n2$Licencia<- gsub("06 A 12", " ", n2$Licencia)
+n2$Licencia<- gsub("06 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("06 A 16", " ", n2$Licencia)
+n2$Licencia<- gsub("06 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("07 A 16", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 22", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
+n2$Licencia<- gsub("08:02 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
+n2$Licencia<- gsub("06:55 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("18 A 06", " ", n2$Licencia)
+n2$Licencia<- gsub("06:40 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:39 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("09 A 17", " ", n2$Licencia)
+n2$Licencia<- gsub("22 A 06", " ", n2$Licencia)
+n2$Licencia<- gsub("22 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("18 A 05", " ", n2$Licencia)
+n2$Licencia<- gsub("07 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("09 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("11 A 21", " ", n2$Licencia)
+n2$Licencia<- gsub("18:20 A 06", " ", n2$Licencia)
+n2$Licencia<- gsub("06 A 08:59", " ", n2$Licencia)
+n2$Licencia<- gsub("11 A 21", " ", n2$Licencia)
+n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 22", " ", n2$Licencia)
+n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 22", " ", n2$Licencia)
+n2$Licencia<- gsub("06:25 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("21:40 A 06", " ", n2$Licencia)
+n2$Licencia<- gsub("18 A 21:02", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
+n2$Licencia<- gsub("12 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
+n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
+n2$Licencia<- gsub("09 A 18", " ", n2$Licencia)
+n2$Licencia<- gsub("07:50 A 18", " ",n2$Licencia)
+n2$Licencia<- gsub("10 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 14", " ", n2$Licencia)
+n2$Licencia<- gsub("10 A 20", " ", n2$Licencia)
+n2$Licencia<- gsub("18:40 A 06", " ", n2$Licencia)
+n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
+n2$Licencia<- gsub("20 A 06", " ", n2$Licencia)
+
+
 
 
 ```
 
+Apertura horaria
 
-transformar hora 
+```{r}
+n2 <- n2 %>%
+  mutate%>%
+    separate(Horario,c("Entrada","Salida"), sep=" A ",extra="merge",fill="left")
+n2$Entrada<-as.numeric(n2$Entrada)
+n2$Salida<-as.numeric(n2$Salida)
+glimpse(n2)
 
+```
 
+horas normales 
 
-#### Dashboard #### 
+```{r}
+hs_semana_jornal<- 8
+hs_sabado_jornal<- 6
 
-Una vez que tenemos todo, sintetizar datos en un tablero
+```
 
--Cantidad de empleados:
+Codifico los dias
 
--Activos  / no activos
+```{r}
 
--Dentro   / fuera cct
+n2<- n2 %>% 
+  mutate(
+    `cod` = case_when( 
+       Dia == "domingo" ~ 1,
+       Dia == "sábado" ~ 3,
+      TRUE ~ 2
+    )
+  )
 
--sindicalizados/ no 
+```
 
--totales bruto / neto
+Diferencia horas extras: 
 
--tocal cargas sociales AFIP
+```{r}
+#1=Domingo
+#2=Semana
+#3=sabado (no le pongo nada y queda en cero)
 
--total sindicato a pagar
+n2<-n2 %>%
+mutate(hs50 = if_else(cod == 2& Salida<Entrada, ((24-Entrada)+(0+Salida))-hs_semana_jornal,(if_else(cod == 2& Entrada<Salida, (Salida-Entrada)-hs_semana_jornal, 0))),
+       hs100 =if_else(cod == 1& Salida<Entrada, (24-Entrada)+(0+Salida),(if_else(cod == 1& Entrada<Salida, (Salida-Entrada), 0))))
+
+```
+
+diferencia de hs nocturnas
+
+```{r}
+
+n2 %>%
+  select(Legajo, Fecha, Entrada, Salida)%>%
+mutate(Noc = if_else(Salida >21, (Salida-21),
+             if_else(Entrada >21,(24-Entrada)+(0+Salida),0))) # se podria trabajar aun mas
+                     
+                  
+
+```
 
