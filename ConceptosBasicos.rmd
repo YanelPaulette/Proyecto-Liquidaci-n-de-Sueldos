@@ -1,5 +1,5 @@
 ---
-title: "Anexo 1: Liquidación de Sueldos"
+title: "Liquidación de Sueldos"
 subtitle: "Conceptos Básicos"
 author: "Yanel Paulette"
 date: '\today'
@@ -18,33 +18,25 @@ output:
 
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+
 ```
 
-Nuestro nuevo dataset, solo tiene ...
-
-
-
-
-## << Borrador >>
 
 ## Presentación 
 
-El presente documento es un anexo al documento principal  referido al procesamiento de novedades de liquidación. 
+El presente documento contiene conceptos básicos sobre la liquidación de sueldos en Argentina y la explicación de los pasos a seguir para la presentación mediante un documento R Markdown.
+
+Para mayor información sobre Rmarkdown podes consultar [aquí](https://rmarkdown.rstudio.com/).
 
 
 ## Objetivo
 
 
-Presentamos a continuación los conceptos básicos de Liquidación de Sueldos, los cuales serán utilizados en el documento principal.
-(pd: acá iria el enlace del proyecto de procesamiento de novedades)
+Un acercamiento a los  conceptos básicos de Liquidación de Sueldos. 
 
 
 ------------------------------------------------------------------------
 
-Para comenzar, configuramos el encabezado de nuestro documento {RMarkdown}  segun los objetivos buscados. 
-(ver si profundizamos)
-
-Luego seleccionamos un theme que nos resulte pertinente. Podes consultarlos en el siguiente enlace [Themes](https://bootswatch.com/3/)
 
 
 Las librerias que  utilizamos para el presente documento, son las siguientes: 
@@ -54,14 +46,16 @@ Las librerias que  utilizamos para el presente documento, son las siguientes:
 
 
 library(googlesheets4)  # para trabajar con google drive
-library(kableExtra) # para tablas lindas
+library(kableExtra) # para tablas 
 
 
 ```
 
 
-Incorporamos los siguientes archivos  y creamos objetos para cada uno. 
-La creación de objetos, nos permite la manipulación más ordenada de los datos:
+Incorporamos los siguientes archivos  y creamos objetos para cada uno.
+
+
+La creación de objetos, nos permite la manipulación más ordenada de los datos.
 
 
 
@@ -96,7 +90,6 @@ azul <- "#344D7E"
 
 En el presente documento, vamos a utilizar en lineas generales la [ley de contrato de trabajo](http://servicios.infoleg.gob.ar/infolegInternet/verNorma.do?id=25552) que regula las relaciones laborales en el ambito privado.
 
-Los intitutos presentados pueden variar según cada convenio, pero siempre manteniendo el espiritu buscado por la normativa general. 
 
 ------------------------------------------------------------------------
 
@@ -189,6 +182,7 @@ Para mayor informacion sobre modalidades de contratación , se puede consultar l
 
 El Salario Mínimo Vital y Móvil, de acuerdo con la Ley de Contrato de Trabajo, se define como "la menor remuneración" que debe percibir en efectivo el trabajador sin cargas de familia, en su jornada legal de trabajo.
 El Consejo Nacional del Empleo, la Productividad y el Salario Mínimo Vital y Móvil (CNEPSMVM) determina periódicamente el Salario Mínimo.
+
 Los importes vigentes son los siguientes:
 
 ```{r}
@@ -211,7 +205,7 @@ Para los empleados dentro de convenio, el mismo depende de las negociaciones en 
 Cada gremio determinará el sueldo correspondiente
 
 
-**Antiguedad**
+**Antigüedad**
 
 La antigüedad es el tiempo de servicio efectivo que un trabajador tiene en su lugar de trabajo, desde su ingreso o vinculación laboral.
 Si el empleado egresa de la compañia y reingresa a las ordenes del mismo empleador, mantiene la misma antiguedad.
@@ -272,11 +266,11 @@ El [Decreto 484/2000](http://servicios.infoleg.gob.ar/infolegInternet/anexos/600
 ◼ 200 horas anuales.
 
 
-##### Horas Extras al 50%
+**Horas Extras al 50%**
 
 Si la prestacion se realizo desde el Lunes hasta el sábado a las 13hs, cada hora extra laborada debe abonarse con un recargo del 50%.
 
-##### Horas Extras al 100%
+**Horas Extras al 100%**
 
 Si la prestación se realizo un día feriado, sábados después de las 13hs o domingos, cada hora extra laborada debe abonarse con un recargo del 100%.
 
@@ -314,13 +308,13 @@ Si no los convoca, no afectará el cobro del dia laboral, y en caso de ser convo
 
 Es aquel día en los que la ley dispone que no se presten tareas laborales por conmemorarse alguna celebración religiosa, historia o algún otro evento de índole similar.
 
-Se pueden consultar los dias feriados y no laborables en la siguiente página [Ministerio del Interior](https://www.argentina.gob.ar/interior/feriados-nacionales-2021).
+Se pueden consultar los dias feriados y no laborables en la siguiente página [Ministerio del Interior](https://www.argentina.gob.ar/interior/feriados-nacionales-2022).
 
 **Feriados Trabajados**
 
 En el caso que el empleado trabaje un feriado, tiene una bonificación del 100% extra de su valor.
 
-**Distribucion del Horario Laboral**
+**Distribución del Horario Laboral**
 
 El empleador se encuentra autorizado legalmente a diagramar los horarios de trabajo cumpliendo los siguientes recaudos:
 
@@ -381,9 +375,6 @@ Dichas contingencias imposibilitan al empleado a prestar teareas, generando el d
 
 ```{r}
 
-#gt(Inculpable)%>% 
-#  tab_header(title = "Enfermedad Inculpable ") %>%
-#  tab_source_note(source_note = fuente)
 
 Inculpable%>% 
   kable("html", escape=F) %>%
@@ -415,7 +406,7 @@ En caso de enfermedad o accidente laboral se realiza la denuncia del siniestro a
 El empleador abonara los primeros 10 dias del accidente, los dias posteriores se hace cargo la ART.
 Los salarios por los dias de accidente, los abona la empresa, y luego la empresa realiza las gestiones con la ART para solicitar el recupero de los mismos.
 
-Para mayor informacion sobre los riesgos de trabajo, podes consultar en
+Para mayor informacion sobre los riesgos de trabajo, podes consultar en el siguiente enlace: 
 
 [Superintencia de Riesgos de Trabajo](https://www.argentina.gob.ar/srt).
 
@@ -424,11 +415,6 @@ Para mayor informacion sobre los riesgos de trabajo, podes consultar en
 Las licencias generales establecidas en la LCT son las siguientes:
 
 ```{r}
-
-
-#gt(Licencias)%>% 
-#  tab_header(title = "Licencias Especiales") %>%
-#  tab_source_note(source_note = fuente)
 
 Licencias%>% 
   kable("html", escape=F) %>%
@@ -554,8 +540,16 @@ Asimismo, la relación laboral que se inicie un día inhábil , podrá ser anula
 
 ------------------------------------------------------------------------
 
-*En caso de encontrar observaciones, información incompleta o que deseen ampliar, por favor te  invitamos a que nos escriban para poder darle solución inmediata.*
 
-\
+## Contacto
+
+[Yanel Paulette](https://yanelpaulette.netlify.app/)
+
+
+------------------------------------------------------------------------
+
+*En caso de encontrar observaciones, información incompleta o que deseen ampliar quedan abiertos los canales de contacto*
+
+
 
 
