@@ -1,6 +1,6 @@
 ---
-title: "Anexo 1: Liquidación de Sueldos"
-subtitle: "Conceptos Básicos"
+title: "Procesamiento de Novedades de Sueldos"
+subtitle: "Liquidacion de Sueldos"
 author: "Yanel Paulette y Diego Sipes"
 date: '\today'
 linkcolor: blue
@@ -15,13 +15,11 @@ output:
 
 ---
 
-Nota: Voy trabajando este documento, volcando ideas para ir armando el codigo. 
-
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
-#### Procesamiento de Novedades de liquidacion  #####
+#### Procesamiento de Novedades de liquidación  #####
 
 ##Objetivos
 completar
@@ -31,11 +29,14 @@ completar : rrhh q trabajen con novedades de liq
 
 ## Procedimiento
 
-Para comenzar, se deben realizar configuraciones iniciales, las cuales iremo detallando a continuación: 
+Para comenzar, se deben realizar configuraciones iniciales, las cuales iremos detallando a continuación: 
+## Aclaraciones
+
+No se ve nada teórico,  pueden consultar algunos de los conceptos a trabajar en en el present documento  [aquí](https://serviciosweb.afip.gob.ar/genericos/guiaDeTramites/VerGuia.aspx?tr=47)
 
 
-## Pasos (ver)
-
+## Pasos 
+## Configuraciones iniciales
 Incorporamos las librerias a utilizar
 
 ```{r}
@@ -65,27 +66,26 @@ library( hms)
 Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos: 
 
 ```{r}
-# Estilo limpio sin líneas de fondo
+
 estilo <- theme(panel.grid = element_blank(),
                 plot.background = element_rect(fill = "#FBFCFC"),
                 panel.background = element_blank(),
                 text = element_text(family = "Roboto"))
 
-# Estilo limpio con líneas de referencia verticales en gris claro
+
 estilov <- theme(panel.grid = element_blank(),
                  plot.background = element_rect(fill = "#FBFCFC"),
                  panel.background = element_blank(),
                  panel.grid.major.x = element_line(color = "#AEB6BF"),
                  text = element_text(family = "Roboto"))
 
-# Estilo limpio con líneas de referencia horizontales en gris claro
+
 estiloh <- theme(panel.grid = element_blank(),
                  plot.background = element_rect(fill = "#FBFCFC"),
                  panel.background = element_blank(),
                  panel.grid.major.y = element_line(color = "#AEB6BF"),
                  text = element_text(family = "Roboto"))
 
-#  objetos para formatear las etiquetas numéricas de los ejes x e y
 eje_x_n <- scale_x_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
 
 eje_y_n <- scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
@@ -101,55 +101,65 @@ amarillo <- "#FFA600"
 gris <- "#75838F"
 lila <- "#755395"
 rojo <- "#943126"
-fuente <- "Fuente: Elaboración propiaS"
+fuente <- "Fuente: Elaboración propia"
 ```
 
-##### Primer Ejemplo de Novedades #### 
+Vamos a presentar dos ejemplos de procesamiento de novedades, con análisis diferentes en cada caso. 
+
+## Primer Ejemplo de Novedades
 
 
 Incorporamos las bases de datos a utilizar, desde el drive. 
 
 ```{r}
-original <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
-egreso <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2") #la 2° hoja
+original_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
+egreso_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2") #la 2° hoja
 
 ```
 
-Comenzamos con algunas limpiezas;: 
+Almaceanamos en otro objeto para evitar usar la base original: 
+
+```{r}
+n1<- original_1
+e1<- egreso_1
+
+```
+
+Formatear nombres de las columnas
 
 ```{r}
 #agregar puntos a las  columnas:
 
 
-limpios <- make.names(colnames(original)) #agregar puntos columnas
-colnames(original) <- limpios
+limpios <- make.names(colnames(n1)) #agregar puntos columnas
+colnames(n1) <- limpios
 rm(limpios) # borro objeto
 
-#agregar puntos a las  columnas:
 
+limpios <- make.names(colnames(e1)) 
+colnames(e1) <- limpios
+rm(limpios) 
 
-limpios <- make.names(colnames(egreso)) #agregar puntos columnas
-colnames(egreso) <- limpios
-rm(limpios) # borro objeto
+n1
 
 ```
 
+Consultamos el tamaño de nuestro dataset.
 
-
-Consultamos el tamaño de nuestro dataset. En este caso tiene una dimension de `tamaño`, con  `columnas` y con  `filas`. Cada fila representa una persona, y cada columna una variable. 
+En este caso tiene una dimension de `tamaño`, con  `columnas` y con  `filas`. Cada fila representa una persona, y cada columna una variable. 
 
 
 Vemos ahora,  si las columnas tienen nombres inadecuados para  trabajar  y acto seguido los modificamos
 
 ```{r}
-names(original)
+names(n1)
 ```
 
-Cambiamos los nombres de las columnas con la funcion "Rename"
+Cambiamos los nombres de las columnas con la función "Rename"
 
 ```{r}
 
-Novedades <- original %>% 
+n1 <- n1 %>% 
   rename("Hs.Extras.50%" = "X50.")%>% 
   rename("Hs.Extras.100%" = "X100.")%>% 
   rename("Hs.Feriado" = "X100..FT")%>% 
@@ -167,13 +177,13 @@ Novedades <- original %>%
 Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion "View":
 
 ```{r}
-view(Novedades)
+view(n1)
 ```
 
-Por el alacance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
+Por el alcance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
 
 ```{r}
-Novedades2<- Novedades%>% 
+n1<- n1%>% 
   select(Legajo, Centro.Costo,  Activo, Convenio, `Hs.Extras.50%`, `Hs.Extras.100%`, Hs.Noct, Enfermedad, Vacaciones )
 ```
 
@@ -187,7 +197,7 @@ En primer lugar podemos conocer cantidades.
 Podemos consultar cual es la nomina  que tiene actualmente la compañia. 
 
 ```{r}
-Nomina<- Novedades %>% 
+Nomina<- n1 %>% 
   select(Activo) %>%
   mutate(cuenta = 1) %>% 
   group_by(Activo) %>% 
@@ -216,8 +226,6 @@ row_spec(0, bold=T, color="white", background = azul)
 
 ```
 
-
-
 Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso. 
 
 Es posible que dicha información no la tengamos en la misma tabla, en ese caso, tendremos que hacer  unos pasos adicionales. 
@@ -228,15 +236,16 @@ El resultado:  una nueva tabla con la información combinada.
 
 Primero: consultamos los nombres de las columnas: 
 ```{r}
-names(egreso)
-names(original)
+
+names(e1)
+names(n1)
 
 ```
 
-Primero, seleccionamos las columnas de la segunda hoja, con las que vamos a trabajar: 
+Primero, seleccionamos las columnas  con las que vamos a trabajar: 
 
 ```{r}
-egreso2<- egreso%>%
+e1<- e1%>%
   select(Legajo, Fecha.de.Ingreso, Fecha.de.Egreso, Motivo.de.Egreso)
 
 ```
@@ -245,9 +254,9 @@ Luego, unimos las tablas por la columna en comun "Legajo" y seleccionamos las co
 
 ```{r}
 
-egreso3 <- left_join(original, egreso, by = "Legajo")
+e1 <- left_join(n1, e1, by = "Legajo")
 
-egreso3<-egreso3%>%
+e2<-e1%>%
   select(Legajo:Convenio, Motivo.de.Egreso) %>%   # Usamos rangos, y columnas independientes
   filter(Activo=="NO")  %>%  
   mutate(cuenta = 1) %>% 
@@ -266,9 +275,9 @@ Y luego presentamos la información  en una tabla:
 
 ```{r}
 
-egreso3$TIP <- c("Egresos del mes") 
+e2$TIP <- c("Egresos del mes") 
 
-egreso3%>% 
+e2%>% 
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
     select(Motivo.de.Egreso,Cuenta) %>% kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
@@ -279,7 +288,7 @@ row_spec(0, bold=T, color="white", background = azul)
 En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repiten, lo cual implica que unifiquemos nombres, lo cual hacemos con la funcion "fct_collapse":
 
 ```{r}
- egreso3<-  egreso2 %>%
+ e2<-  e2 %>%
  mutate(Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, "Desp C/C" = c("Desp C/ Causa","Despido con causa", "Despido C/C")),
         Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, "Desp S/C" = c("Despido sin C","Despido sin causa", "Despido S/C")))
 ```
@@ -288,10 +297,8 @@ AHora si volvemos a presentar la información en una tabla:
 
 
 ```{r}
-egreso3$TIP <- c("Egresos del mes")
 
-
-egreso3 %>%   # Usamos rangos, y columnas independientes
+e2 %>%   # Usamos rangos, y columnas independientes
   mutate(cuenta = 1) %>% 
   group_by(Motivo.de.Egreso) %>% 
   summarise(Cuenta = sum(cuenta)) %>% 
@@ -302,29 +309,14 @@ row_spec(0, bold=T, color="white", background = azul)
 
 ```
 
-Por último quisieramos saber la cantidad de licencias que tuvimos en el mes. (ver, queda horrible)
+## Segundo Ejemplo de Novedades
 
-
-```{r}
-Novedades2%>% 
-  select(Legajo, Enfermedad, Vacaciones ) %>% 
-  filter(Enfermedad!=0  | Vacaciones!=0) %>%    # operador or
-  mutate(cuenta = 1) %>% 
-  group_by(Enfermedad,Vacaciones)%>% 
-  summarise(Cuenta = sum(cuenta)) %>% 
-  arrange(-Cuenta)
-
-
-
-```
-##### Segundo Ejemplo de Novedades #### 
-
-
+Ahora veamos otro ejemplo de procesamiento de novedades. 
 
 Incorporamos las bases de datos a utilizar, desde el drive. 
 
 ```{r}
-original2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1) # 1° hoja, salto la hoja 1
+original_2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1) # 1° hoja, salto la hoja 1
 
 ```
 
@@ -332,8 +324,8 @@ para manipularlo:
 
 
 ```{r}
-n2 <-original2
-#rm(n2)
+n2 <-original_2
+
 ```
 
 
@@ -444,10 +436,10 @@ mutate(`Dia` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
 n2
 
 
-
 ```
 
 Licencias: 
+
 ```{r}
 n2<- n2 %>%
   mutate(Licencia=Horario)
@@ -463,10 +455,10 @@ n2<- n2%>%
          Licencia =  fct_collapse(Licencia, "Aus C/P" = "AUS C/ PERM"),
          Licencia =  fct_collapse(Licencia, "Aus S/A" = "AUS S/ AVISO"),
          Licencia =  fct_collapse(Licencia, "Vacunación" = "VACUNACION"),
-         Licencia =  fct_collapse(Licencia, "Calent" = c("CALENT 4 HS","CALENT 4HS")))
+         Licencia =  fct_collapse(Licencia, "Calent" = c("CALENT 4 HS","CALENT 4HS")))#se agregan 4 hs extras al 50 mas...
 
 
-#Esto es horrible,  ver como hacerlo bien: 
+#Esto es horrible,  ver como hacerlo bien!!! 
 
 n2$Licencia<- gsub("06 A 12", " ", n2$Licencia)
 n2$Licencia<- gsub("06 A 14", " ", n2$Licencia)
@@ -533,6 +525,7 @@ Apertura horaria
 n2 <- n2 %>%
   mutate%>%
     separate(Horario,c("Entrada","Salida"), sep=" A ",extra="merge",fill="left")
+
 n2$Entrada<-as.numeric(n2$Entrada)
 n2$Salida<-as.numeric(n2$Salida)
 glimpse(n2)
@@ -575,7 +568,7 @@ mutate(hs50 = if_else(cod == 2& Salida<Entrada, ((24-Entrada)+(0+Salida))-hs_sem
 
 ```
 
-diferencia de hs nocturnas
+diferencia de hs nocturnas #ver lo del corte a las 6..
 
 ```{r}
 
@@ -669,6 +662,8 @@ pivot_wider(names_from = Licencia, values_from = cuenta)
 
 glimpse(n2)
 
+# esto esta mal, ya que falta acomodar las licencias, para limpiarlas bien,pero es provisorio
+
 n2<-n2 %>% 
   select(-` ` )  %>% 
   select(-`NA` )   %>% 
@@ -682,7 +677,8 @@ glimpse(n2)
 ```
 
 
-#agregar puntos a las  columnas:
+ agregar puntos a las  columnas:
+
 ```{r}
 limpios <- make.names(colnames(n2)) #agregar puntos columnas
 colnames(n2) <- limpios
@@ -690,8 +686,9 @@ rm(limpios) # borro objeto
 glimpse(n2)
 ```
 
+##  Ingreso Masivo
 
-pivotar, para armar el ingreso masivo: 
+Pivotar, para armar el ingreso masivo: 
 
 
 ```{r}
@@ -704,7 +701,7 @@ n3<-n2 %>%
 
 ```
 
-Ingreso MAsivo:
+Ingreso Masivo:
 ```{r}
 
 n3 %>%
@@ -714,4 +711,18 @@ n3 %>%
 
 
 ```
+
+------------------------------------------------------------------------
+
+
+## Contacto
+
+[Yanel Paulette](https://yanelpaulette.netlify.app/)
+
+
+[Diego Sipes](https://www.linkedin.com/in/diego-s-51474032//)
+
+
+
+------------------------------------------------------------------------
 
