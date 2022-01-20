@@ -367,6 +367,7 @@ Fechas
 ```{r}
 n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") # Cambie formato 
 
+
 n2 <- n2 %>% 
   mutate(Fecha = mdy(Fecha))
 
@@ -441,11 +442,14 @@ n2
 Licencias: 
 
 ```{r}
+
+# duplico la columna Horario, para usarla con Licencias, 
 n2<- n2 %>%
-  mutate(Licencia=Horario)
+  mutate(Licencia=Horario)%>%
+  mutate(Lic=0)
 
-n2$Licencia<-as.factor(n2$Licencia)
 
+# Especifico las licencias
 
 n2<- n2%>%
   mutate(Licencia= str_trim(Licencia,side = "both"),
@@ -455,7 +459,31 @@ n2<- n2%>%
          Licencia =  fct_collapse(Licencia, "Aus C/P" = "AUS C/ PERM"),
          Licencia =  fct_collapse(Licencia, "Aus S/A" = "AUS S/ AVISO"),
          Licencia =  fct_collapse(Licencia, "Vacunación" = "VACUNACION"),
-         Licencia =  fct_collapse(Licencia, "Calent" = c("CALENT 4 HS","CALENT 4HS")))#se agregan 4 hs extras al 50 mas...
+         Licencia =  fct_collapse(Licencia, "Domingos" = c("CALENT 4 HS","CALENT 4HS")))
+
+# De la columna Licencias, sacas todo aquello que no sea una licencia ( sacar todo lo que sea hs)
+
+# creo una nueva variable. pero if_else solo toma valores logicos, por ende me sirve para filtrar luego 
+
+n5<-n2 %>%
+mutate(Lic = if_else(Licencia=="Vacaciones"|Licencia=="Enfermedad"|Licencia=="Vacunación"|Licencia=="Aus C/A"|Licencia=="Aus C/P"|Licencia=="Aus S/A"|Licencia=="Domingos", 1 ,0))
+
+# Uso la columna "Lic" para filtrar. Cuando es = 0 (no es licencia), y en esos casos que borre el # #contenido  de la variable "Licencia"
+
+# opcion 1 
+
+n5 %>%
+mutate(Licencia= if_else(Lic==0, " ", Licencia)) # No funciona 
+
+#opcion 2 
+
+glimpse(n5)
+n5$Lic<- as.logical(n5$Lic)
+
+n6<- n5 %>% 
+  if(Lic==0) {
+  
+  Licencia= " "}# No funciona 
 
 
 #Esto es horrible,  ver como hacerlo bien!!! 
