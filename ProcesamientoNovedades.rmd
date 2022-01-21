@@ -1,6 +1,6 @@
 ---
-title: "Procesamiento de Novedades de Sueldos"
-subtitle: "Liquidacion de Sueldos"
+title: "Proyecto:  Novedades de Sueldos"
+subtitle: "Liquidación de Sueldos"
 author: "Yanel Paulette y Diego Sipes"
 date: '\today'
 linkcolor: blue
@@ -17,6 +17,8 @@ output:
 
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+
+
 ```
 
 #### Procesamiento de Novedades de liquidación  #####
@@ -140,7 +142,7 @@ limpios <- make.names(colnames(e1))
 colnames(e1) <- limpios
 rm(limpios) 
 
-n1
+
 
 ```
 
@@ -174,12 +176,6 @@ n1 <- n1 %>%
 ```
 
 
-Volvemos a consultar el nuevo dataset creado a fin de confirmar los nuevos nombres, con la funcion "View":
-
-```{r}
-view(n1)
-```
-
 Por el alcance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
 
 ```{r}
@@ -204,7 +200,7 @@ Nomina<- n1 %>%
   summarise(Cuenta = sum(cuenta)) %>% 
   arrange(-Cuenta)
 
-Nomina
+
 
 ```
 
@@ -242,7 +238,7 @@ names(n1)
 
 ```
 
-Primero, seleccionamos las columnas  con las que vamos a trabajar: 
+Luego, seleccionamos las columnas  con las que vamos a trabajar: 
 
 ```{r}
 e1<- e1%>%
@@ -371,7 +367,10 @@ n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") # Cambie 
 n2 <- n2 %>% 
   mutate(Fecha = mdy(Fecha))
 
-glimpse(n2)
+n2 <- n2 %>%
+mutate(`Dia` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
+
+
 
 ```
 
@@ -383,7 +382,6 @@ Modificamos las columnas;
 limpios <- make.names(colnames(n2)) 
 colnames(n2) <- limpios
 rm(limpios)
-head(n2)
 ```
 Cambiamos los nombres a las columnas: 
 
@@ -396,7 +394,7 @@ n2 <- n2 %>%
   rename("Agrupación1" = "Mens...Jorn")%>%
   rename("Agrupación2" = "Sector")
 
-head(n2)
+
 ```
 
 
@@ -407,7 +405,7 @@ n2 <- n2 %>%
 mutate(`Agrupación1` = factor(`Agrupación1`))%>%
 mutate(`Agrupación2` = factor(`Agrupación2`))
 
-head(n2)
+
 ```
 
 Unimos las columnas de Nombre y Apellido y eliminamos dichas columnas, individuales: 
@@ -423,18 +421,7 @@ n2<- n2 %>%
   select('Legajo', 'Apynom',everything()) %>%
   select(-Apellido, -Nombre) %>%
   arrange(Apynom)
-head(n2)
 
-
-```
-Le agregamos el dia de la semana
-
-```{r}
-
-n2 <- n2 %>%
-mutate(`Dia` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
-
-n2
 
 
 ```
@@ -443,13 +430,11 @@ Licencias:
 
 ```{r}
 
-# duplico la columna Horario, para usarla con Licencias, 
+# duplico la columna Horario, para usarla con Licencias y luego elimino los horarios
 n2<- n2 %>%
   mutate(Licencia=Horario)%>%
   mutate(Lic=0)
 
-
-# Especifico las licencias
 
 n2<- n2%>%
   mutate(Licencia= str_trim(Licencia,side = "both"),
@@ -461,89 +446,15 @@ n2<- n2%>%
          Licencia =  fct_collapse(Licencia, "Vacunación" = "VACUNACION"),
          Licencia =  fct_collapse(Licencia, "Domingos" = c("CALENT 4 HS","CALENT 4HS")))
 
-# De la columna Licencias, sacas todo aquello que no sea una licencia ( sacar todo lo que sea hs)
-
-# creo una nueva variable. pero if_else solo toma valores logicos, por ende me sirve para filtrar luego 
-
-n5<-n2 %>%
+n2<-n2 %>%
 mutate(Lic = if_else(Licencia=="Vacaciones"|Licencia=="Enfermedad"|Licencia=="Vacunación"|Licencia=="Aus C/A"|Licencia=="Aus C/P"|Licencia=="Aus S/A"|Licencia=="Domingos", 1 ,0))
 
-# Uso la columna "Lic" para filtrar. Cuando es = 0 (no es licencia), y en esos casos que borre el # #contenido  de la variable "Licencia"
-
-# opcion 1 
-
-n5 %>%
-mutate(Licencia= if_else(Lic==0, " ", Licencia)) # No funciona 
-
-#opcion 2 
-
-glimpse(n5)
-n5$Lic<- as.logical(n5$Lic)
-
-n6<- n5 %>% 
-  if(Lic==0) {
-  
-  Licencia= " "}# No funciona 
 
 
-#Esto es horrible,  ver como hacerlo bien!!! 
+n2$Licencia[n2$Lic==0]<-0
 
-n2$Licencia<- gsub("06 A 12", " ", n2$Licencia)
-n2$Licencia<- gsub("06 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("06 A 16", " ", n2$Licencia)
-n2$Licencia<- gsub("06 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("07 A 16", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 22", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
-n2$Licencia<- gsub("08:02 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
-n2$Licencia<- gsub("06:55 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("18 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub("06:40 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:39 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("09 A 17", " ", n2$Licencia)
-n2$Licencia<- gsub("22 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub("22 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("18 A 05", " ", n2$Licencia)
-n2$Licencia<- gsub("07 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("09 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("11 A 21", " ", n2$Licencia)
-n2$Licencia<- gsub("18:20 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub("06 A 08:59", " ", n2$Licencia)
-n2$Licencia<- gsub("11 A 21", " ", n2$Licencia)
-n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 22", " ", n2$Licencia)
-n2$Licencia<- gsub("06:14 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:45 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 22", " ", n2$Licencia)
-n2$Licencia<- gsub("06:25 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("21:40 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub("18 A 21:02", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
-n2$Licencia<- gsub("12 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
-n2$Licencia<- gsub("06:38 A 12", " ", n2$Licencia)
-n2$Licencia<- gsub("09 A 18", " ", n2$Licencia)
-n2$Licencia<- gsub("07:50 A 18", " ",n2$Licencia)
-n2$Licencia<- gsub("10 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 14", " ", n2$Licencia)
-n2$Licencia<- gsub("10 A 20", " ", n2$Licencia)
-n2$Licencia<- gsub("18:40 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub("14 A 18:49", " ", n2$Licencia)
-n2$Licencia<- gsub("20 A 06", " ", n2$Licencia)
-n2$Licencia<- gsub(":49", " ", n2$Licencia)
-n2$Licencia<- gsub("06:25 A 12", " ", n2$Licencia)
-n2$Licencia<- gsub("06:25 A 12", " ", n2$Licencia)
-
-
+n2<- n2%>% 
+  select(everything(), -Lic)
 
 ```
 
@@ -556,7 +467,7 @@ n2 <- n2 %>%
 
 n2$Entrada<-as.numeric(n2$Entrada)
 n2$Salida<-as.numeric(n2$Salida)
-glimpse(n2)
+
 
 ```
 
@@ -596,7 +507,7 @@ mutate(hs50 = if_else(cod == 2& Salida<Entrada, ((24-Entrada)+(0+Salida))-hs_sem
 
 ```
 
-diferencia de hs nocturnas #ver lo del corte a las 6..
+diferencia de hs nocturnas 
 
 ```{r}
 
@@ -666,19 +577,6 @@ n2%>%
   summarise(Cuenta = sum(cuenta)) %>% 
   arrange(-Cuenta)
 
-#######
-#Para saber los que no son licencia: 
-  
-n2%>%
- filter(Licencia!=" ")%>%
- filter(Licencia!= "NA")%>%
- filter(Licencia!= "") %>%
- mutate(cuenta = 1) %>% 
- summarise(Cuenta = sum(cuenta)) %>% 
- arrange(-Cuenta)
-
-######
-#quiero las licencias en columnas, salen mal porque esta mal desde el inicio, #arreglar
 
 
 n2<-n2%>%
@@ -688,19 +586,7 @@ n2<-n2%>%
 n2<-n2  %>% 
 pivot_wider(names_from = Licencia, values_from = cuenta)
 
-glimpse(n2)
 
-# esto esta mal, ya que falta acomodar las licencias, para limpiarlas bien,pero es provisorio
-
-n2<-n2 %>% 
-  select(-` ` )  %>% 
-  select(-`NA` )   %>% 
-  select(-`07: ` )   %>% 
-  select(-`  `  )   %>% 
-  select(-`07:05 A 18` )%>%
-  select(-`06: `   )  
-
-glimpse(n2)
 
 ```
 
@@ -711,10 +597,13 @@ glimpse(n2)
 limpios <- make.names(colnames(n2)) #agregar puntos columnas
 colnames(n2) <- limpios
 rm(limpios) # borro objeto
-glimpse(n2)
+
 ```
 
+
 ##  Ingreso Masivo
+
+
 
 Pivotar, para armar el ingreso masivo: 
 
@@ -722,17 +611,19 @@ Pivotar, para armar el ingreso masivo:
 ```{r}
 
 
-n3<-n2 %>%
-  pivot_longer(cols = c(`hs50`:`Calent`), names_to = "concepto", values_to = "cantidad")%>%
+n2<-n2 %>%
+  pivot_longer(cols = c(`hs50`:`Domingos`), names_to = "concepto", values_to = "cantidad")%>%
     select(Legajo, Apynom,Fecha,  Agrupación1,Agrupación2, concepto, cantidad )%>%
-  filter(cantidad>0)
+  filter(cantidad>0)%>%
+  filter(concepto!='NA.')
 
 ```
+
 
 Ingreso Masivo:
 ```{r}
 
-n3 %>%
+n2 %>%
   select(Legajo, concepto,  cantidad) %>%
   group_by(Legajo,concepto) %>%
   summarise(Cantidad = sum(cantidad))
