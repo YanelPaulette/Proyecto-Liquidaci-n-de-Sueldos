@@ -34,76 +34,33 @@ completar : rrhh q trabajen con novedades de liq
 Para comenzar, se deben realizar configuraciones iniciales, las cuales iremos detallando a continuación: 
 ## Aclaraciones
 
-No se ve nada teórico,  pueden consultar algunos de los conceptos a trabajar en en el present documento  [aquí](https://serviciosweb.afip.gob.ar/genericos/guiaDeTramites/VerGuia.aspx?tr=47)
+No se ve nada teórico,  pueden consultar algunos de los conceptos a trabajar en en el present documento  [aquí](https://rpubs.com/YanelPaulette/Basicos)
 
 
 ## Pasos 
 ## Configuraciones iniciales
+
 Incorporamos las librerias a utilizar
 
 ```{r}
-library(flexdashboard)
-library(tidyverse)      # Transformar y limpiar datos
-library(googlesheets4)  # Leer datos desde Google Sheets
-library(gargle)         # Corregir lectura de símbolos especiales desde Google Sheets
-library(gt)             # Dar formato a las tablas
-library(extrafont)      # Permite utilizar otras fuentes en los gráficos y salidas
-library(ggthemes)       # Amplía las posibilidades estéticas de ggplot2
-library(scales)         # Permite cambiar los formatos de decimales, de porcentajes, etc.
-library(ggalt)          # Nuevos tipos de geom para ggplot2. Para realizar el gráfico de gap salarial
-library(ggplot2)
-library(funModeling)    # Para explorar datos y modelos
-library(forcats)
-library(DT)
+library(tidyverse)      
+library(googlesheets4)  
+library(gargle)         
+library(funModeling)    
 library(kableExtra)
 library(tm)
-library(expss)
-library(lubridate) # para las fechas
+library(lubridate) 
 library(datos)
 library( hms)
-
-
 ```
 
 Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos: 
 
 ```{r}
 
-estilo <- theme(panel.grid = element_blank(),
-                plot.background = element_rect(fill = "#FBFCFC"),
-                panel.background = element_blank(),
-                text = element_text(family = "Roboto"))
-
-
-estilov <- theme(panel.grid = element_blank(),
-                 plot.background = element_rect(fill = "#FBFCFC"),
-                 panel.background = element_blank(),
-                 panel.grid.major.x = element_line(color = "#AEB6BF"),
-                 text = element_text(family = "Roboto"))
-
-
-estiloh <- theme(panel.grid = element_blank(),
-                 plot.background = element_rect(fill = "#FBFCFC"),
-                 panel.background = element_blank(),
-                 panel.grid.major.y = element_line(color = "#AEB6BF"),
-                 text = element_text(family = "Roboto"))
-
-eje_x_n <- scale_x_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
-
-eje_y_n <- scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ","))
-
-#colores
-
 azul <- "#344D7E"
-verde <-  "#4A9FC7"
-rosa1 <- "#B95192"
-rosa2 <- "#EE5777"
-naranja <- "#FF764C"
-amarillo <- "#FFA600"
-gris <- "#75838F"
-lila <- "#755395"
-rojo <- "#943126"
-fuente <- "Fuente: Elaboración propia"
+
+#fuente <- "Fuente: Elaboración propia"
 ```
 
 Vamos a presentar dos ejemplos de procesamiento de novedades, con análisis diferentes en cada caso. 
@@ -449,8 +406,6 @@ n2<- n2%>%
 n2<-n2 %>%
 mutate(Lic = if_else(Licencia=="Vacaciones"|Licencia=="Enfermedad"|Licencia=="Vacunación"|Licencia=="Aus C/A"|Licencia=="Aus C/P"|Licencia=="Aus S/A"|Licencia=="Domingos", 1 ,0))
 
-
-
 n2$Licencia[n2$Lic==0]<-0
 
 n2<- n2%>% 
@@ -609,6 +564,7 @@ Pivotar, para armar el ingreso masivo:
 
 
 ```{r}
+n2
 
 
 n2<-n2 %>%
