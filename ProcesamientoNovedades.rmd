@@ -1,8 +1,8 @@
 ---
-title: "Proyecto:  Novedades de Sueldos"
-subtitle: "Liquidación de Sueldos"
-author: "Yanel Paulette y Diego Sipes"
-date: '\today'
+title: "Novedades de Sueldos"
+subtitle: "*Liquidación de Sueldos*"
+author: "**Yanel Paulette y Diego Sipes**"
+date: 'Año 2022'
 linkcolor: blue
 urlcolor: blue
 output:
@@ -15,32 +15,52 @@ output:
 
 ---
 
+
 ```{r setup, include=FALSE} 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
 
 ```
 
-#### Procesamiento de Novedades de liquidación  #####
 
-##Objetivos
-completar
+### Objetivos
 
-## Destinatarios
-completar : rrhh q trabajen con novedades de liq 
+El Objetivo de esta presentación  es mostrar en muy sencillos pasos,  un pre-procesamiento de novedades para la liquidación de sueldos. 
 
-## Procedimiento
-
-Para comenzar, se deben realizar configuraciones iniciales, las cuales iremos detallando a continuación: 
-## Aclaraciones
-
-No se ve nada teórico,  pueden consultar algunos de los conceptos a trabajar en en el present documento  [aquí](https://rpubs.com/YanelPaulette/Basicos)
+Siendo el área de Payroll una de las principales de RRHH, nos resultó interesante armar una propuesta que ayude a disminuir el tiempo destinado a la preparación de los datos para la liquidación. 
 
 
-## Pasos 
-## Configuraciones iniciales
+Muchas de las funciones que habitualmente se realizan  con Excel, también se pueden hacer con otras herramientas, por ejemplo con R, como lo hicimos en este caso. Existen ventajas y deventajas, pero en este caso y para los ejemplos que vamos a ver, te vamos a mostrar  que son muchos más los beneficios. 
 
-Incorporamos las librerias a utilizar
+
+Te invitamos a acompañarnos!
+
+![](https://img.vixdata.io/pd/webp-large/es/sites/default/files/c/bebe_emocionado.jpg){width='300px'}
+
+
+### Destinatarios
+
+
+El detalle procedimental utilizado en el presente documento, tiene como objetivo que pueda ser utilizado por quienes ya manejan programación en R, pero también  por quienes se están iniciando por ese camino. 
+
+Para quienes trabajan o conocen  la parte *HARD* de HR  *(Administración de personal / Payroll)*  sentirán familiares los pasos y conceptos. 
+
+Para quienes no lo estan, conocerán una alternativa que podría ser implementada en áreas  de HR con el fin de agregar valor a la función. 
+
+
+### Aclaraciones
+
+En el presente proyecto no veremos contenido  teórico,  pueden consultar algunos de los conceptos a trabajar [acá](https://rpubs.com/YanelPaulette/Basicos)
+
+Nos  enforcaremos en los pasos y comandos necesarios, de acuerdo a los ejemplos que utilizamos para ejemplificar.
+
+### Procedimiento
+
+A continuación, comenzamos a explicar el paso a paso  para realizar la limpieza y organización de los datos, según los objetivos presentados. 
+
+Para comenzar, se deben realizar configuraciones iniciales, las cuales iremos detallando a continuación. 
+
+Incorporamos las librerias a utilizar.
 
 ```{r}
 library(tidyverse)      
@@ -54,21 +74,23 @@ library(datos)
 library( hms)
 ```
 
-Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos: 
+Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos.
 
 ```{r}
 
 azul <- "#344D7E"
 
-#fuente <- "Fuente: Elaboración propia"
+fuente <- "Fuente: Elaboración propia"
 ```
 
-Vamos a presentar dos ejemplos de procesamiento de novedades, con análisis diferentes en cada caso. 
+------------------------------------------------------------------------
 
-## Primer Ejemplo de Novedades
+Con el fin de aportar diversidad de análisis y propuestas, vamos  a presentar dos ejemplos de procesamiento de novedades.
 
 
-Incorporamos las bases de datos a utilizar, desde el drive. 
+### Primer Caso
+
+Incorporamos las bases de datos a utilizar.
 
 ```{r}
 original_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
@@ -76,7 +98,7 @@ egreso_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "
 
 ```
 
-Almaceanamos en otro objeto para evitar usar la base original: 
+Almacenamos los datos en  objeto para evitar usar la base original.
 
 ```{r}
 n1<- original_1
@@ -84,37 +106,33 @@ e1<- egreso_1
 
 ```
 
-Formatear nombres de las columnas
+Formateamos nombres de las columnas.
 
 ```{r}
-#agregar puntos a las  columnas:
 
-
-limpios <- make.names(colnames(n1)) #agregar puntos columnas
+limpios <- make.names(colnames(n1)) 
 colnames(n1) <- limpios
-rm(limpios) # borro objeto
-
+rm(limpios) 
 
 limpios <- make.names(colnames(e1)) 
 colnames(e1) <- limpios
 rm(limpios) 
 
-
-
 ```
 
 Consultamos el tamaño de nuestro dataset.
 
-En este caso tiene una dimension de `tamaño`, con  `columnas` y con  `filas`. Cada fila representa una persona, y cada columna una variable. 
+```{r}
+dim (n1)
+```
 
-
-Vemos ahora,  si las columnas tienen nombres inadecuados para  trabajar  y acto seguido los modificamos
+Vemos ahora,  si las columnas tienen nombres inadecuados para  trabajar. De ser necesario los modificamos. 
 
 ```{r}
 names(n1)
 ```
 
-Cambiamos los nombres de las columnas con la función "Rename"
+Cambiamos los nombres de las columnas. 
 
 ```{r}
 
@@ -129,11 +147,10 @@ n1 <- n1 %>%
   rename("2°Vianda" = "D.Vianda") %>%
   rename("Centro.Costo" = "CC") 
 
-
 ```
 
 
-Por el alcance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas: 
+Por el alcance del presente proyecto, solo  vamos a trabajar con algunas variables,  por ello seleccionamos las variables  deseadas. 
 
 ```{r}
 n1<- n1%>% 
@@ -143,11 +160,11 @@ n1<- n1%>%
 ¿ Qué tipo de análisis podemos hacer?
 
 Aqui tenemos que pensar qué datos son relevantes para el negocio. 
-Mirando con dichos ojos, qué analsis podemos hacer con  poca intervencion de código. 
+
 
 En primer lugar podemos conocer cantidades. 
 
-Podemos consultar cual es la nomina  que tiene actualmente la compañia. 
+Podemos consultar cual es la nómina  que tiene actualmente la compañia. 
 
 ```{r}
 Nomina<- n1 %>% 
@@ -157,13 +174,13 @@ Nomina<- n1 %>%
   summarise(Cuenta = sum(cuenta)) %>% 
   arrange(-Cuenta)
 
+Nomina
 
 
 ```
 
-Podemos mejorar la visualización con el paquete {Kable}
+Podemos mejorar la visualización.
 
-* Aplausos para la maravilla del parametro TIP*
 
 ```{r}
 
@@ -173,7 +190,8 @@ Nomina%>%
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
     select(Activo,Cuenta) %>% kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul)
+row_spec(0, bold=T, color="white", background = azul) %>% 
+  footnote(general = fuente)
 
 
 
@@ -183,7 +201,9 @@ Ahora veamos de aquellos que son baja, cuales fueron los motivos de egreso.
 
 Es posible que dicha información no la tengamos en la misma tabla, en ese caso, tendremos que hacer  unos pasos adicionales. 
 
-A continuación vamos a ver cómo relacionamos dos tablas. Para hacerlo, necesitamos 1 elemento en común: en nuestro caso será el legajo. 
+A continuación vamos a ver cómo relacionamos dos tablas.
+
+Para hacerlo, necesitamos 1 elemento en común: en nuestro caso será el legajo. 
 
 El resultado:  una nueva tabla con la información combinada.
 
@@ -195,7 +215,7 @@ names(n1)
 
 ```
 
-Luego, seleccionamos las columnas  con las que vamos a trabajar: 
+Seleccionamos las columnas  con las que vamos a trabajar: 
 
 ```{r}
 e1<- e1%>%
@@ -221,8 +241,7 @@ e2<-e1%>%
 
 ```
 
-Y luego presentamos la información  en una tabla: 
-
+Finalmente presentamos la información  en una tabla: 
 
 
 
@@ -234,11 +253,12 @@ e2%>%
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
     select(Motivo.de.Egreso,Cuenta) %>% kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul)
+row_spec(0, bold=T, color="white", background = azul) %>% 
+  footnote(general = fuente)
 
 ```
 
-En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repiten, lo cual implica que unifiquemos nombres, lo cual hacemos con la funcion "fct_collapse":
+En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repiten, lo cual implica que unifiquemos nombres.
 
 ```{r}
  e2<-  e2 %>%
@@ -246,43 +266,45 @@ En el cuadro anterior, vemos que los nombres de los motivos de egreso, se repite
         Motivo.de.Egreso = fct_collapse(Motivo.de.Egreso, "Desp S/C" = c("Despido sin C","Despido sin causa", "Despido S/C")))
 ```
 
-AHora si volvemos a presentar la información en una tabla: 
+Ahora si, volvemos a presentar la información en una tabla: 
 
 
 ```{r}
 
-e2 %>%   # Usamos rangos, y columnas independientes
+e2 %>%   
   mutate(cuenta = 1) %>% 
   group_by(Motivo.de.Egreso) %>% 
   summarise(Cuenta = sum(cuenta)) %>% 
   arrange(-Cuenta)%>%
   kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul)
+row_spec(0, bold=T, color="white", background = azul) %>% 
+  footnote(general = fuente)
 
 ```
+------------------------------------------------------------------------
 
-## Segundo Ejemplo de Novedades
+### Segundo Caso
 
 Ahora veamos otro ejemplo de procesamiento de novedades. 
 
-Incorporamos las bases de datos a utilizar, desde el drive. 
+Incorporamos las bases de datos a utilizar.
 
 ```{r}
-original_2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1) # 1° hoja, salto la hoja 1
+original_2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1)
 
 ```
 
-para manipularlo: 
+Cramos un objeto para manipularlo y evitar usar las bases originales. 
 
 
 ```{r}
 n2 <-original_2
-
+#rm(n2)
 ```
 
 
-Pasar a Mayusculas: 
+Pasamos a mayúsculas, por una cuestión visual. 
 
 ```{r}
 
@@ -292,8 +314,7 @@ n2 <- mutate_if(n2, is.character, toupper)
 ```
 
 
-
-Pivotar: 
+Hacemos un poco de magia para poder tener nuestra información organizada. 
 
 ```{r}
  
@@ -302,7 +323,7 @@ n2<- n2 %>%
 
 ```
 
-Eliminamos la primer tanda de columnas: 
+Eliminamos columnas que ya sabemos no vamos a usar.
 
 ```{r}
  
@@ -313,26 +334,22 @@ n2<- n2 %>%
 ```
 
 
+Trabajar con fechas, no suele ser tarea fácil, pero es neceario para realizar ciertos procesos.
 
-
-Fechas
+Pasamos a formato "Fecha", la columna designada. 
 
 ```{r}
-n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") # Cambie formato 
-
+n2$Fecha <- format(as.Date(n2$Fecha, format = "%d/%m/%Y"), "%m-%d-%Y") 
 
 n2 <- n2 %>% 
   mutate(Fecha = mdy(Fecha))
-
 n2 <- n2 %>%
 mutate(`Dia` = wday(n2$Fecha,label = TRUE, abbr = FALSE))
-
-
 
 ```
 
 
-Modificamos las columnas; 
+Modificamos las columnas, por una cuestión visual.
 
 ```{r}
 
@@ -340,36 +357,23 @@ limpios <- make.names(colnames(n2))
 colnames(n2) <- limpios
 rm(limpios)
 ```
-Cambiamos los nombres a las columnas: 
+
+Cambiamos los nombres a las columnas, según los intereses del cliente.
 
 
 ```{r}
-
 
 n2 <- n2 %>% 
   rename("Legajo" = "N.Legajo")%>%
   rename("Agrupación1" = "Mens...Jorn")%>%
   rename("Agrupación2" = "Sector")
 
-
 ```
 
-
-Pasamos a factor las catgeoria que despues vamos a categorizar.. y confirmamos el cambio: 
-
-```{r}
-n2 <- n2 %>%
-mutate(`Agrupación1` = factor(`Agrupación1`))%>%
-mutate(`Agrupación2` = factor(`Agrupación2`))
-
-
-```
-
-Unimos las columnas de Nombre y Apellido y eliminamos dichas columnas, individuales: 
+Tenemos dos columnas para Nombre y Apellido. Sería mejor tener una sola.
 
 
 ```{r}
-
 
 n2<- within(n2, 'Apynom' <- paste(Apellido, Apellido, sep=' '))
 
@@ -383,11 +387,10 @@ n2<- n2 %>%
 
 ```
 
-Licencias: 
+Limpiamos  y ordenamos las licencias. 
 
 ```{r}
 
-# duplico la columna Horario, para usarla con Licencias y luego elimino los horarios
 n2<- n2 %>%
   mutate(Licencia=Horario)%>%
   mutate(Lic=0)
@@ -413,7 +416,7 @@ n2<- n2%>%
 
 ```
 
-Apertura horaria
+Continuamos con los horarios. Necesitamos limpiarlos, para poder trabajar con las variables. 
 
 ```{r}
 n2 <- n2 %>%
@@ -426,15 +429,13 @@ n2$Salida<-as.numeric(n2$Salida)
 
 ```
 
-horas normales 
-
+Definimos objetos necesarios, para trabajar con horas extras. 
 ```{r}
 hs_semana_jornal<- 8
 hs_sabado_jornal<- 6
 
 ```
 
-Codifico los dias
 
 ```{r}
 
@@ -449,12 +450,12 @@ n2<- n2 %>%
 
 ```
 
-Diferencia horas extras: 
+Parametrizamos las columnas releacionadas con horas extras. 
 
 ```{r}
 #1=Domingo
 #2=Semana
-#3=sabado (no le pongo nada y queda en cero)
+#3=sabado 
 
 n2<-n2 %>%
 mutate(hs50 = if_else(cod == 2& Salida<Entrada, ((24-Entrada)+(0+Salida))-hs_semana_jornal,(if_else(cod == 2& Entrada<Salida, (Salida-Entrada)-hs_semana_jornal, 0))),
@@ -462,21 +463,20 @@ mutate(hs50 = if_else(cod == 2& Salida<Entrada, ((24-Entrada)+(0+Salida))-hs_sem
 
 ```
 
-diferencia de hs nocturnas 
+Hacemos lo mismo con horas nocturnas.
 
 ```{r}
 
-n2 %>%
-  select(Legajo, Fecha, Entrada, Salida)%>%
+n2<-n2 %>%
 mutate(Noc = if_else(Salida >21, (Salida-21),
-             if_else(Entrada >21,(24-Entrada)+(0+Salida),0))) # se podria trabajar aun mas
+             if_else(Entrada >21,(24-Entrada)+(0+Salida),0))) 
                      
                   
-
 ```
 
-Feriados: 
+Si la persona  trabaja un feriado, tenemos que considerar dichas horas. 
 
+Comenzamos configurando los días feriados. 
 ```{r}
 
 calendario <- data.frame(
@@ -493,8 +493,7 @@ calendario <- calendario %>%
 
 ```
 
-relaciono tablas
-
+Luego, identificamos los dias feriados de nuestro archivo de trabajo. 
 ```{r}
 
 n2<-left_join(n2, calendario, by = "Fecha")
@@ -505,7 +504,7 @@ n2 <- n2 %>%
 
 ```
 
-Si trabajo un feriado, remplazo las horas trabajadas, en dicha columna: 
+Por ultimo, si trabajó un feriado, remplazamos las horas trabajadas, en una  columna creada a tal efecto. 
 
 ```{r}
 
@@ -520,10 +519,9 @@ n2 %>%
 
 ```
 
-pivotar licencia: 
+Hacemos un poco de magia para ordenar las licencias. 
 
 ```{r}
-#consulto las lic
 
 n2%>%
   select(Licencia) %>%
@@ -532,40 +530,33 @@ n2%>%
   summarise(Cuenta = sum(cuenta)) %>% 
   arrange(-Cuenta)
 
-
-
 n2<-n2%>%
  mutate(cuenta = 1)
-
 
 n2<-n2  %>% 
 pivot_wider(names_from = Licencia, values_from = cuenta)
 
-
-
 ```
 
-
- agregar puntos a las  columnas:
+Mejoramos la visualización de las columnas.
 
 ```{r}
-limpios <- make.names(colnames(n2)) #agregar puntos columnas
+limpios <- make.names(colnames(n2)) 
 colnames(n2) <- limpios
-rm(limpios) # borro objeto
+rm(limpios) 
+
+
 
 ```
 
 
-##  Ingreso Masivo
+Ingreso Masivo
 
+Llegamos al final. Una vez que procesamos todo el archivo, necesitamos consolidar todo en solo  tres columnas, para luego liquidar las novedades informadas del legajo mediante un sistema de liquidación de sueldos. 
 
-
-Pivotar, para armar el ingreso masivo: 
-
+El resultado es el siguiente: 
 
 ```{r}
-n2
-
 
 n2<-n2 %>%
   pivot_longer(cols = c(`hs50`:`Domingos`), names_to = "concepto", values_to = "cantidad")%>%
@@ -576,21 +567,30 @@ n2<-n2 %>%
 ```
 
 
-Ingreso Masivo:
 ```{r}
 
-n2 %>%
+n2%>%
   select(Legajo, concepto,  cantidad) %>%
-  group_by(Legajo,concepto) %>%
+  rename("Concepto"= "concepto")%>%
+  group_by(Legajo,Concepto) %>%
   summarise(Cantidad = sum(cantidad))
+
+
 
 
 ```
 
+
 ------------------------------------------------------------------------
 
 
-## Contacto
+Llegamos al final. Gracias por la participación y lxs esperamos en nuestras redes para seguir en contacto!
+
+
+------------------------------------------------------------------------
+
+
+### Contacto
 
 [Yanel Paulette](https://yanelpaulette.netlify.app/)
 
