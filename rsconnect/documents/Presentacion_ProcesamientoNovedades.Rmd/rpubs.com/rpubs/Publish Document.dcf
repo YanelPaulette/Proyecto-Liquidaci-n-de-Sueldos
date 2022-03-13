@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/873095/090b4147b4734fa9b8c8cd8dd2e392b3
+bundleId: https://api.rpubs.com/api/v1/document/873095/090b4147b4734fa9b8c8cd8dd2e392b3
+url: http://rpubs.com/YanelPaulette/873095
+when: 1647210262.1025
+lastSyncTime: 1647210262.1025

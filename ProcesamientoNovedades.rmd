@@ -1,11 +1,12 @@
 ---
-title: "Novedades de Sueldos"
-subtitle: "*Liquidación de Sueldos*"
+title: "Administración de Personal en R"
+subtitle: ""
 author: "**Yanel Paulette y Diego Sipes**"
 date: 'Año 2022'
 linkcolor: blue
 urlcolor: blue
 output:
+  rmdformats::readthedown:
   html_document:
     theme: spacelab
     toc: true
@@ -22,7 +23,6 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ```
 
-
 ### Objetivos
 
 El Objetivo de esta presentación  es mostrar en muy sencillos pasos,  un pre-procesamiento de novedades para la liquidación de sueldos. 
@@ -30,12 +30,24 @@ El Objetivo de esta presentación  es mostrar en muy sencillos pasos,  un pre-pr
 Siendo el área de Payroll una de las principales de RRHH, nos resultó interesante armar una propuesta que ayude a disminuir el tiempo destinado a la preparación de los datos para la liquidación. 
 
 
-Muchas de las funciones que habitualmente se realizan  con Excel, también se pueden hacer con otras herramientas, por ejemplo con R, como lo hicimos en este caso. Existen ventajas y deventajas, pero en este caso y para los ejemplos que vamos a ver, te vamos a mostrar  que son muchos más los beneficios. 
+Muchas de las funciones que habitualmente se realizan  con Excel, también se pueden hacer con otras herramientas, por ejemplo con R, como lo hicimos en este caso.
+
+Existen ventajas y deventajas, pero en este caso y para los ejemplos que vamos a ver, te vamos a mostrar  que son muchos más los beneficios. 
 
 
 Te invitamos a acompañarnos!
 
 ![](https://img.vixdata.io/pd/webp-large/es/sites/default/files/c/bebe_emocionado.jpg){width='300px'}
+
+### Objetivos Especificos 
+
+Aprender a usar algunos paquetes para limpiar datos y estructurar información en R para trabajar con  datos limpios:
+
+- Cada columna es una variable
+- Cada fila es una observación
+
+
+![](2.jpg){width='500px'}
 
 
 ### Destinatarios
@@ -72,13 +84,14 @@ library(tm)
 library(lubridate) 
 library(datos)
 library( hms)
+library(rmdformats)
 ```
 
 Creamos objetos que vamos a utlizar en diversas oportunidades y solo debemos invocarlos.
 
 ```{r}
 
-azul <- "#344D7E"
+blue <- "#344D7E"
 
 fuente <- "Fuente: Elaboración propia"
 ```
@@ -90,13 +103,19 @@ Con el fin de aportar diversidad de análisis y propuestas, vamos  a presentar d
 
 ### Primer Caso
 
-Incorporamos las bases de datos a utilizar.
+Incorporamos las bases de datos a utilizar. Las mismas las tenemos en el drive: 
+
+![](1.jpg){width='900px'} 
+
+
 
 ```{r}
 original_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14") # 1° hoja
 egreso_1 <- read_sheet("1_AUDkMkG80ribPRl76M2KWtqwDk_hWiM7IOzKSZ6N14", sheet = "2") #la 2° hoja
 
 ```
+
+
 
 Almacenamos los datos en  objeto para evitar usar la base original.
 
@@ -159,12 +178,12 @@ n1<- n1%>%
 
 ¿ Qué tipo de análisis podemos hacer?
 
-Aqui tenemos que pensar qué datos son relevantes para el negocio. 
+Aqui tenemos que pensar qué datos son relevantes segun el  objetivo buscado.
 
 
 En primer lugar podemos conocer cantidades. 
 
-Podemos consultar cual es la nómina  que tiene actualmente la compañia. 
+Podemos consultar cual es la nómina  que tiene actualmente la compañia mediante la siguiente tabla: 
 
 ```{r}
 Nomina<- n1 %>% 
@@ -190,7 +209,7 @@ Nomina%>%
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
     select(Activo,Cuenta) %>% kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul) %>% 
+row_spec(0, bold=T, color="white", background = blue) %>% 
   footnote(general = fuente)
 
 
@@ -253,7 +272,7 @@ e2%>%
   mutate(Cuenta=text_spec(Cuenta, "html", tooltip=TIP)) %>% 
     select(Motivo.de.Egreso,Cuenta) %>% kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul) %>% 
+row_spec(0, bold=T, color="white", background = blue) %>% 
   footnote(general = fuente)
 
 ```
@@ -278,7 +297,7 @@ e2 %>%
   arrange(-Cuenta)%>%
   kable("html", escape=F) %>% 
     kable_styling(full_width = TRUE, bootstrap_options = c("striped","hover","condensed" )) %>% 
-row_spec(0, bold=T, color="white", background = azul) %>% 
+row_spec(0, bold=T, color="white", background = blue) %>% 
   footnote(general = fuente)
 
 ```
@@ -290,6 +309,8 @@ Ahora veamos otro ejemplo de procesamiento de novedades.
 
 Incorporamos las bases de datos a utilizar.
 
+![](3.jpg){width='900px'} 
+
 ```{r}
 original_2 <- read_sheet("1JOrvsv_C6Kn7tCdaAwqDNJjUC2MEdaZ8Ivj3z6rH3ds", skip=1)
 
@@ -300,7 +321,37 @@ Cramos un objeto para manipularlo y evitar usar las bases originales.
 
 ```{r}
 n2 <-original_2
-#rm(n2)
+
+```
+
+Consultamos el tamaño de nuestro dataset.
+
+```{r}
+dim (n2)
+```
+
+¿ Qué buscamos con este archivo? Reducirlo a 3 columnas
+
+
+![](5.jpg){width='300px'}
+
+Consultamos las variables 
+
+```{r}
+glimpse(n2)
+```
+
+
+Eliminamos columnas que ya sabemos no vamos a usar.
+
+![](6.jpg){width='950px'}
+
+```{r}
+ 
+n2<- n2 %>%
+  select(everything()) %>%
+  select(-Sem1:-Sem5)
+
 ```
 
 
@@ -323,15 +374,6 @@ n2<- n2 %>%
 
 ```
 
-Eliminamos columnas que ya sabemos no vamos a usar.
-
-```{r}
- 
-n2<- n2 %>%
-  select(everything()) %>%
-  select(-Sem1:-Sem5)
-
-```
 
 
 Trabajar con fechas, no suele ser tarea fácil, pero es neceario para realizar ciertos procesos.
